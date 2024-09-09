@@ -18,7 +18,7 @@ namespace preemo {
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
 		Adapter adapter(instance, &adapterOpts);
-		adapter.Inspect();
+		//adapter.Inspect();
 
 		// Request Device
 		wgpu::DeviceDescriptor deviceDesc = {};
@@ -28,13 +28,27 @@ namespace preemo {
 		deviceDesc.requiredLimits = nullptr;
 		deviceDesc.defaultQueue.nextInChain = nullptr;
 		deviceDesc.defaultQueue.label = "The default queue";
+#ifdef WEBGPU_BACKEND_WGPU
 		deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
 			std::cout << "Device lost: reason " << reason;
 			if (message) std::cout << " (" << message << ")";
 			std::cout << std::endl;
 		};
+#else
+		wgpu::DeviceLostCallbackInfo callbackInfo;
+		callbackInfo.callback = [](WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
+			std::cout << "Device: " << device << std::endl;
+			std::cout << "Device lost: reason " << reason;
+			if (message) std::cout << " (" << message << ")";
+			std::cout << std::endl;
+			};
+		callbackInfo.nextInChain = nullptr;
+		deviceDesc.deviceLostCallbackInfo = callbackInfo;
+#endif
+
+
 		device = Device(adapter, &deviceDesc);
-		device.Inspect();
+		//device.Inspect();
 
 		// Initialize Queue
 		queue = wgpuDeviceGetQueue(device.wgpuDevice);
