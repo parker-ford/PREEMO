@@ -3,7 +3,7 @@
 namespace preemo {
 	RenderingManager::Device::Device() = default;
 
-	preemo::RenderingManager::Device::Device(Adapter adapter, wgpu::DeviceDescriptor const* descriptor)
+	RenderingManager::Device::Device(Adapter adapter, wgpu::DeviceDescriptor const* descriptor)
 	{
 		wgpuDevice = RequestDeviceSynchronous(adapter.wgpuAdapter, descriptor);
 

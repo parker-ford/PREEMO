@@ -13,13 +13,7 @@ namespace preemo {
 		}
 
 		// Initialize Surface
-		// TODO: Make Surface class
-		window = reinterpret_cast<GLFWwindow*>(windowPtr);
-		surface = glfwGetWGPUSurface(instance, window);
-		if (!surface) {
-			std::cerr << "Did not initialize surface" << std::endl;
-			return false;
-		}
+		surface = Surface(instance, windowPtr);
 
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
@@ -51,14 +45,14 @@ namespace preemo {
 		config.width = 640;
 		config.height = 480;
 		config.usage = wgpu::TextureUsage::RenderAttachment;
-		wgpu::TextureFormat surfaceFormat = surface.getPreferredFormat(adapter.wgpuAdapter);
+		wgpu::TextureFormat surfaceFormat = surface.wgpuSurface.getPreferredFormat(adapter.wgpuAdapter);
 		config.format = surfaceFormat;
 		config.viewFormatCount = 0;
 		config.viewFormats = nullptr;
 		config.device = device.wgpuDevice;
 		config.presentMode = wgpu::PresentMode::Fifo;
 		config.alphaMode = wgpu::CompositeAlphaMode::Auto;
-		wgpuSurfaceConfigure(surface, &config);
+		surface.Configure(&config);
 
 		//TODO: Release Adapter & Instance
 
@@ -88,7 +82,7 @@ namespace preemo {
 	{
 		glfwPollEvents();
 
-		WGPUTextureView targetView = GetNextSurfaceTextureView();
+		WGPUTextureView targetView = surface.GetNextSurfaceTextureView();
 		if (!targetView) {
 			std::cout << "target View null" << std::endl;
 			return;
@@ -140,7 +134,7 @@ namespace preemo {
 		// At the end of the frame
 		wgpuTextureViewRelease(targetView);
 #ifndef __EMSCRIPTEN__
-		wgpuSurfacePresent(surface);
+		wgpuSurfacePresent(surface.wgpuSurface);
 #endif
 
 		// Also move here the tick/poll but NOT the emscripten sleep
@@ -155,30 +149,7 @@ namespace preemo {
 
 	bool RenderingManager::IsRunning()
 	{
-		return !glfwWindowShouldClose(window);
-	}
-
-	wgpu::TextureView RenderingManager::GetNextSurfaceTextureView() {
-		WGPUSurfaceTexture surfaceTexture;
-		wgpuSurfaceGetCurrentTexture(surface, &surfaceTexture);
-		if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success) {
-			return nullptr;
-		}
-
-		// Create a view for this surface texture
-		WGPUTextureViewDescriptor viewDescriptor;
-		viewDescriptor.nextInChain = nullptr;
-		viewDescriptor.label = "Surface texture view";
-		viewDescriptor.format = wgpuTextureGetFormat(surfaceTexture.texture);
-		viewDescriptor.dimension = WGPUTextureViewDimension_2D;
-		viewDescriptor.baseMipLevel = 0;
-		viewDescriptor.mipLevelCount = 1;
-		viewDescriptor.baseArrayLayer = 0;
-		viewDescriptor.arrayLayerCount = 1;
-		viewDescriptor.aspect = WGPUTextureAspect_All;
-		WGPUTextureView targetView = wgpuTextureCreateView(surfaceTexture.texture, &viewDescriptor);
-
-		return targetView;
+		return !surface.ShouldClose();
 	}
 
 }

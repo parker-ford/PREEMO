@@ -24,11 +24,11 @@ namespace preemo {
 		bool IsRunning();
 	private:
 		bool InitializeInstance(wgpu::Instance* instance);
-		wgpu::TextureView GetNextSurfaceTextureView();
 
 	private:
 		class Adapter;
 		class Device;
+		class Surface;
 
 		class Adapter {
 			friend class RenderingManager;
@@ -54,11 +54,23 @@ namespace preemo {
 			wgpu::Device wgpuDevice;
 		};
 
+		class Surface {
+			friend class RenderingManager;
+		public:
+			Surface();
+			Surface(wgpu::Instance instance, void* windowPtr);
+			bool ShouldClose();
+			void Configure(wgpu::SurfaceConfiguration* config);
+			wgpu::TextureView GetNextSurfaceTextureView();
+		private:
+			wgpu::Surface wgpuSurface;
+			GLFWwindow* window;
+		};
+
 	private:
-		GLFWwindow* window;
-		wgpu::Surface surface;
 		wgpu::Queue queue;
 		Device device;
+		Surface surface;
 	};
 }
 
