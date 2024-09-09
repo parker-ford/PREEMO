@@ -1,4 +1,3 @@
 .vs/
 
-.out/
-.out/build
+out/

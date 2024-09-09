@@ -1,0 +1,6 @@
+[Prefix = "preemo::"]
+interface Root {
+	void Root();
+	boolean StartUp(VoidPtr windowPtr);
+	void Run();
+};
