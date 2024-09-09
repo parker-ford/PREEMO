@@ -28,13 +28,7 @@ namespace preemo {
 		deviceDesc.requiredLimits = nullptr;
 		deviceDesc.defaultQueue.nextInChain = nullptr;
 		deviceDesc.defaultQueue.label = "The default queue";
-#ifdef WEBGPU_BACKEND_WGPU
-		deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
-			std::cout << "Device lost: reason " << reason;
-			if (message) std::cout << " (" << message << ")";
-			std::cout << std::endl;
-		};
-#else
+#ifdef WEBGPU_BACKEND_DAWN
 		wgpu::DeviceLostCallbackInfo callbackInfo;
 		callbackInfo.callback = [](WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
 			std::cout << "Device: " << device << std::endl;
@@ -44,6 +38,12 @@ namespace preemo {
 			};
 		callbackInfo.nextInChain = nullptr;
 		deviceDesc.deviceLostCallbackInfo = callbackInfo;
+#else
+		deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
+			std::cout << "Device lost: reason " << reason;
+			if (message) std::cout << " (" << message << ")";
+			std::cout << std::endl;
+			};
 #endif
 
 
