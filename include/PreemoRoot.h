@@ -12,6 +12,7 @@ namespace preemo {
 	class Root {
 	public:
 		bool StartUp(void* window);
+		void ShutDown();
 		bool IsRunning();
 		void Run();
 	};

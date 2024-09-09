@@ -10,13 +10,14 @@
     <script src="../../out/build/release-emscripten/PREEMO.js"></script>
     <script>
         createModule().then(function(Module) {
-            console.log(Module)
-            const root = new Module.Root();
-            root.StartUp(null);
-            root.Run();
-            // if(!root.StartUp(null)) {
-            //     console.log("Failed to initialize");
-            // }
+            try {
+                console.log(Module);
+                const root = new Module.Root();
+                root.StartUp(null);
+                root.Run();
+            } catch (e) {
+                console.error("Error:", e);
+            }
         });
     </script>
 </body>

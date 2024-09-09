@@ -19,7 +19,7 @@ namespace preemo {
 	class RenderingManager {
 	public:
 		bool StartUp(void* windowPtr);
-		void Terminate();
+		void ShutDown();
 		void MainLoop();
 		bool IsRunning();
 	private:

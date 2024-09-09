@@ -104,7 +104,7 @@ endif()
 
 if (EMSCRIPTEN)
 	set_target_properties(PREEMO PROPERTIES SUFFIX ".js")
-    target_link_options(PREEMO PRIVATE 
+    target_link_options(PREEMO PRIVATE
 		-sASSERTIONS=1
         -sASYNCIFY=1
         -sWASM=1

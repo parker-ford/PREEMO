@@ -73,6 +73,14 @@ namespace preemo {
 		return true;
 	}
 
+	void RenderingManager::ShutDown()
+	{
+		surface.wgpuSurface.unconfigure();
+		queue.release();
+		surface.wgpuSurface.release();
+		device.wgpuDevice.release();
+	}
+
 
 	bool RenderingManager::InitializeInstance(wgpu::Instance* instance)
 	{
