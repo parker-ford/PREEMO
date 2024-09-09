@@ -14,6 +14,11 @@ namespace preemo {
 		return true;
 	}
 
+	void Root::ShutDown()
+	{
+		gRenderingManager.ShutDown();
+	}
+
 	bool Root::IsRunning()
 	{
 		return gRenderingManager.IsRunning();
@@ -24,8 +29,6 @@ namespace preemo {
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 		std::cout << "running.." << std::endl;
 		auto callback = [](void* arg) {
-			/*Root* pRoot = reinterpret_cast<Root*>(arg);
-			pRoot->MainLoop();*/
 			RenderingManager* pRenderingManager = reinterpret_cast<RenderingManager*>(arg);
 			pRenderingManager->MainLoop();
 		};
@@ -35,14 +38,6 @@ namespace preemo {
 			gRenderingManager.MainLoop();
 		}
 #endif
+		ShutDown();
 	}
-
 }
-
-//	void Root::Terminate()
-//	{
-//	/*	surface.unconfigure();
-//		queue.release();
-//		surface.release();
-//		device.release();*/
-//	}

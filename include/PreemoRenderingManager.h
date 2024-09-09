@@ -19,16 +19,25 @@ namespace preemo {
 	class RenderingManager {
 	public:
 		bool StartUp(void* windowPtr);
-		void Terminate();
+		void ShutDown();
 		void MainLoop();
 		bool IsRunning();
 	private:
 		bool InitializeInstance(wgpu::Instance* instance);
 
 	private:
+		class Instance;
 		class Adapter;
 		class Device;
 		class Surface;
+
+		class Instance {
+			friend class RenderingManager;
+		public:
+			Instance();
+		private:
+			wgpu::Instance wgpuInstance;
+		};
 
 		class Adapter {
 			friend class RenderingManager;

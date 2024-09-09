@@ -50,6 +50,7 @@ if(EMSCRIPTEN)
 		src/PreemoRenderingManagerAdapter.cpp
 		src/PreemoRenderingManagerDevice.cpp
 		src/PreemoRenderingManagerSurface.cpp
+		src/PreemoRenderingManagerInstance.cpp
 		src/webgpu_impl.cpp
 		${CMAKE_BINARY_DIR}/intermediate/webidl_wrapper.cpp
 	)
@@ -61,6 +62,7 @@ else()
 		src/PreemoRenderingManagerAdapter.cpp
 		src/PreemoRenderingManagerDevice.cpp
 		src/PreemoRenderingManagerSurface.cpp
+		src/PreemoRenderingManagerInstance.cpp
 		src/webgpu_impl.cpp
 	)
 
@@ -104,7 +106,7 @@ endif()
 
 if (EMSCRIPTEN)
 	set_target_properties(PREEMO PROPERTIES SUFFIX ".js")
-    target_link_options(PREEMO PRIVATE 
+    target_link_options(PREEMO PRIVATE
 		-sASSERTIONS=1
         -sASYNCIFY=1
         -sWASM=1

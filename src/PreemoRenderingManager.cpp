@@ -6,19 +6,15 @@ namespace preemo {
 	bool RenderingManager::StartUp(void* windowPtr)
 	{
 		// Initialize Instance
-		wgpu::Instance instance;
-		if (!InitializeInstance(&instance)) {
-			std::cerr << "Root Initialization Failed" << std::endl;
-			return false;
-		}
+		Instance instance = Instance();
 
 		// Initialize Surface
-		surface = Surface(instance, windowPtr);
+		surface = Surface(instance.wgpuInstance, windowPtr);
 
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
-		Adapter adapter(instance, &adapterOpts);
-		adapter.Inspect();
+		Adapter adapter(instance.wgpuInstance, &adapterOpts);
+		//adapter.Inspect();
 
 		// Request Device
 		wgpu::DeviceDescriptor deviceDesc = {};
@@ -28,13 +24,27 @@ namespace preemo {
 		deviceDesc.requiredLimits = nullptr;
 		deviceDesc.defaultQueue.nextInChain = nullptr;
 		deviceDesc.defaultQueue.label = "The default queue";
+#ifdef WEBGPU_BACKEND_DAWN
+		wgpu::DeviceLostCallbackInfo callbackInfo;
+		callbackInfo.callback = [](WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
+			std::cout << "Device: " << device << std::endl;
+			std::cout << "Device lost: reason " << reason;
+			if (message) std::cout << " (" << message << ")";
+			std::cout << std::endl;
+			};
+		callbackInfo.nextInChain = nullptr;
+		deviceDesc.deviceLostCallbackInfo = callbackInfo;
+#else
 		deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* /* pUserData */) {
 			std::cout << "Device lost: reason " << reason;
 			if (message) std::cout << " (" << message << ")";
 			std::cout << std::endl;
-		};
+			};
+#endif
+
+
 		device = Device(adapter, &deviceDesc);
-		device.Inspect();
+		//device.Inspect();
 
 		// Initialize Queue
 		queue = wgpuDeviceGetQueue(device.wgpuDevice);
@@ -54,28 +64,19 @@ namespace preemo {
 		config.alphaMode = wgpu::CompositeAlphaMode::Auto;
 		surface.Configure(&config);
 
-		//TODO: Release Adapter & Instance
+		//Release Adapter & Instance
+		adapter.wgpuAdapter.release();
+		instance.wgpuInstance.release();
 
 		return true;
 	}
 
-
-	bool RenderingManager::InitializeInstance(wgpu::Instance* instance)
+	void RenderingManager::ShutDown()
 	{
-		wgpu::InstanceDescriptor desc = {};
-		desc.nextInChain = nullptr;
-
-#ifdef WEBGPU_BACKEND_EMSCRIPTEN
-		* instance = wgpuCreateInstance(nullptr);
-#else
-		* instance = wgpuCreateInstance(&desc);
-#endif
-		if (!instance) {
-			std::cerr << "Could not initialize WebGPU!" << std::endl;
-			return false;
-		}
-
-		return true;
+		surface.wgpuSurface.unconfigure();
+		queue.release();
+		surface.wgpuSurface.release();
+		device.wgpuDevice.release();
 	}
 
 	void RenderingManager::MainLoop()
