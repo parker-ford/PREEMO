@@ -6,18 +6,14 @@ namespace preemo {
 	bool RenderingManager::StartUp(void* windowPtr)
 	{
 		// Initialize Instance
-		wgpu::Instance instance;
-		if (!InitializeInstance(&instance)) {
-			std::cerr << "Root Initialization Failed" << std::endl;
-			return false;
-		}
+		Instance instance = Instance();
 
 		// Initialize Surface
-		surface = Surface(instance, windowPtr);
+		surface = Surface(instance.wgpuInstance, windowPtr);
 
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
-		Adapter adapter(instance, &adapterOpts);
+		Adapter adapter(instance.wgpuInstance, &adapterOpts);
 		//adapter.Inspect();
 
 		// Request Device
@@ -68,7 +64,9 @@ namespace preemo {
 		config.alphaMode = wgpu::CompositeAlphaMode::Auto;
 		surface.Configure(&config);
 
-		//TODO: Release Adapter & Instance
+		//Release Adapter & Instance
+		adapter.wgpuAdapter.release();
+		instance.wgpuInstance.release();
 
 		return true;
 	}
@@ -79,25 +77,6 @@ namespace preemo {
 		queue.release();
 		surface.wgpuSurface.release();
 		device.wgpuDevice.release();
-	}
-
-
-	bool RenderingManager::InitializeInstance(wgpu::Instance* instance)
-	{
-		wgpu::InstanceDescriptor desc = {};
-		desc.nextInChain = nullptr;
-
-#ifdef WEBGPU_BACKEND_EMSCRIPTEN
-		* instance = wgpuCreateInstance(nullptr);
-#else
-		* instance = wgpuCreateInstance(&desc);
-#endif
-		if (!instance) {
-			std::cerr << "Could not initialize WebGPU!" << std::endl;
-			return false;
-		}
-
-		return true;
 	}
 
 	void RenderingManager::MainLoop()

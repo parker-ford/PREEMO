@@ -50,6 +50,7 @@ if(EMSCRIPTEN)
 		src/PreemoRenderingManagerAdapter.cpp
 		src/PreemoRenderingManagerDevice.cpp
 		src/PreemoRenderingManagerSurface.cpp
+		src/PreemoRenderingManagerInstance.cpp
 		src/webgpu_impl.cpp
 		${CMAKE_BINARY_DIR}/intermediate/webidl_wrapper.cpp
 	)
@@ -61,6 +62,7 @@ else()
 		src/PreemoRenderingManagerAdapter.cpp
 		src/PreemoRenderingManagerDevice.cpp
 		src/PreemoRenderingManagerSurface.cpp
+		src/PreemoRenderingManagerInstance.cpp
 		src/webgpu_impl.cpp
 	)
 
