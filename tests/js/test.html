@@ -9,11 +9,19 @@
     <canvas id="canvas"></canvas>
     <script src="../../out/build/release-emscripten/PREEMO.js"></script>
     <script>
-        createModule().then( async function(Module) {
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        createModule().then(async function(Module) {
             try {
-                console.log(Module);
+                // console.log(Module);
+                // console.log(Module.Root());
                 const root = new Module.Root();
-                root.StartUp(null);
+                console.log(root);
+                await root.StartUp(null);
+                // root.foo();
+
+                // await sleep(1000);
                 root.Run();
             } catch (e) {
                 console.error("Error:", e);

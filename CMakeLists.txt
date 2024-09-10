@@ -110,7 +110,7 @@ if (EMSCRIPTEN)
 	set_target_properties(PREEMO PROPERTIES SUFFIX ".js")
     target_link_options(PREEMO PRIVATE
 		-sASSERTIONS=1
-        -sASYNCIFY=1
+        -sASYNCIFY
         -sWASM=1
         -sMODULARIZE=1
         -sEXPORT_NAME="createModule"

@@ -20,6 +20,7 @@ namespace preemo {
 		void ShutDown();
 		bool IsRunning();
 		void Run();
+		void foo();
 	};
 
 }

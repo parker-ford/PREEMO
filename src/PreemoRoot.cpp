@@ -16,17 +16,6 @@ namespace preemo {
 		g_RenderingManager->TestPipeline();
 
 
-#ifdef WEBGPU_BACKEND_EMSCRIPTEN
-			std::cout << "running.." << std::endl;
-			auto callback = [](void* arg) {
-				RenderingManager* p_RenderingManager = reinterpret_cast<RenderingManager*>(arg);
-				std::cout << p_RenderingManager << std::endl;
-				p_RenderingManager->MainLoop();
-			};
-			std::cout << "global rendering manager before callback: " << g_RenderingManager << std::endl;
-			emscripten_set_main_loop_arg(callback, g_RenderingManager, 0, true);
-#endif
-
 		return true;
 	}
 
@@ -42,12 +31,43 @@ namespace preemo {
 
 	void Root::Run()
 	{
-#ifndef WEBGPU_BACKEND_EMSCRIPTEN
+#ifdef WEBGPU_BACKEND_EMSCRIPTEN
+		//std::cout << "running.." << std::endl;
+		//auto callback = [](void* arg) {
+		//	//RenderingManager* p_RenderingManager = reinterpret_cast<RenderingManager*>(arg);
+		//	//std::cout << "a " << p_RenderingManager << std::endl;
+		//	//std::cout << "b " << g_RenderingManager << std::endl;
+		//	g_RenderingManager->MainLoop();
+		//	//p_RenderingManager->MainLoop();
+		//};
+		auto callback = [](void*) {
+			g_RenderingManager->MainLoop();
+		};
+		std::cout << "global rendering manager before callback: " << g_RenderingManager << std::endl;
+		emscripten_set_main_loop_arg(callback, nullptr, 0, true);
+		//emscripten_set_main_loop_arg()
+#else
 		while (IsRunning()) {
 			g_RenderingManager->MainLoop();
 		}
 		ShutDown();
 #endif
 	}
+
+#ifdef WEBGPU_BACKEND_EMSCRIPTEN
+	EM_ASYNC_JS(int, do_fetch, (), {
+
+	fetch('https://jsonplaceholder.typicode.com/todos/1')
+		.then(response => response.json())
+		.then(data => console.log(data))
+		.catch (error => console.error('Error:', error));
+
+		});
+	void Root::foo() {
+		std::cout << "foo before" << std::endl;
+		do_fetch();
+		std::cout << "foo after" << std::endl;
+	}
+#endif
 
 }

@@ -3,4 +3,5 @@ interface Root {
 	void Root();
 	boolean StartUp(VoidPtr windowPtr);
 	void Run();
+	void foo();
 };
