@@ -13,6 +13,7 @@ namespace preemo {
 	}
 
 	void RenderingManager::Surface::Configure(wgpu::SurfaceConfiguration* config) {
+		this->format = config->format;
 		wgpuSurfaceConfigure(wgpuSurface, config);
 	}
 

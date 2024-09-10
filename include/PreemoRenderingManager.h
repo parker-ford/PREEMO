@@ -15,16 +15,10 @@
 #include <cassert>
 #include <vector>
 
+//#include "PreemoRenderPipeline.h"
+
 namespace preemo {
 	class RenderingManager {
-	public:
-		bool StartUp(void* windowPtr);
-		void ShutDown();
-		void MainLoop();
-		bool IsRunning();
-	private:
-		bool InitializeInstance(wgpu::Instance* instance);
-
 	private:
 		class Instance;
 		class Adapter;
@@ -71,15 +65,36 @@ namespace preemo {
 			bool ShouldClose();
 			void Configure(wgpu::SurfaceConfiguration* config);
 			wgpu::TextureView GetNextSurfaceTextureView();
+		public:
+			wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 		private:
 			wgpu::Surface wgpuSurface;
 			GLFWwindow* window;
 		};
 
+	public:
+		RenderingManager(const RenderingManager&) = delete;
+		RenderingManager& operator=(const RenderingManager&) = delete;
+
+		static bool StartUp(void* windowPtr);
+		static void ShutDown();
+		static RenderingManager& GetInstance();
+
+		void MainLoop();
+		bool IsRunning();
+		wgpu::Device getWGPUDevice();
+		Surface getSurface();
+
+
 	private:
+		RenderingManager(void* windowPtr);
+		~RenderingManager();
+	private:
+		//PREEMO_TODO: Need to consider making these pointers
 		wgpu::Queue queue;
-		Device device;
+		Device mDevice;
 		Surface surface;
+		//RenderPipeline pipeline;
 	};
 }
 

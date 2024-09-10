@@ -5,8 +5,6 @@
 #include <cassert>
 #include <vector>
 
-#include "PreemoRenderingManager.h"
-
 namespace preemo {
 
 	class Root {

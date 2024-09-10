@@ -1,12 +1,13 @@
 #include "PreemoRoot.h"
+#include "PreemoRenderingManager.h"
 
 namespace preemo {
 
-	RenderingManager gRenderingManager;
+	extern RenderingManager* g_RenderingManager;
 
 	bool Root::StartUp(void* window)
 	{
-		if (!gRenderingManager.StartUp(window)) {
+		if (!g_RenderingManager->StartUp(window)) {
 			std::cout << "Failed to start up rendering manager" << std::endl;
 			return false;
 		}
@@ -16,12 +17,12 @@ namespace preemo {
 
 	void Root::ShutDown()
 	{
-		gRenderingManager.ShutDown();
+		g_RenderingManager->ShutDown();
 	}
 
 	bool Root::IsRunning()
 	{
-		return gRenderingManager.IsRunning();
+		return g_RenderingManager->IsRunning();
 	}
 
 	void Root::Run()
@@ -35,7 +36,7 @@ namespace preemo {
 		emscripten_set_main_loop_arg(callback, &gRenderingManager, 0, true);
 #else
 		while (IsRunning()) {
-			gRenderingManager.MainLoop();
+			g_RenderingManager->MainLoop();
 		}
 #endif
 		ShutDown();

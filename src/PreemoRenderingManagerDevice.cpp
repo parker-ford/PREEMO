@@ -18,7 +18,7 @@ namespace preemo {
 
 	wgpu::Device RenderingManager::Device::RequestDeviceSynchronous(wgpu::Adapter adapter, wgpu::DeviceDescriptor const* descriptor) {
 		struct UserData {
-			wgpu::Device device = nullptr;
+			wgpu::Device requestedDevice = nullptr;
 			bool requestEnded = false;
 		};
 		UserData userData;
@@ -26,7 +26,7 @@ namespace preemo {
 		auto onDeviceRequestEnded = [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message, void* pUserData) {
 			UserData& userData = *reinterpret_cast<UserData*>(pUserData);
 			if (status == WGPURequestDeviceStatus_Success) {
-				userData.device = device;
+				userData.requestedDevice = device;
 			}
 			else {
 				std::cout << "Could not get WebGPU device: " << message << std::endl;
@@ -49,12 +49,12 @@ namespace preemo {
 
 		assert(userData.requestEnded);
 
-		if (!userData.device) {
+		if (!userData.requestedDevice) {
 			std::cout << "Failed to request device" << std::endl;
 			return nullptr;
 		}
 
-		return userData.device;
+		return userData.requestedDevice;
 	}
 
 	void RenderingManager::Device::Inspect() {
