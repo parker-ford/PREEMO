@@ -8,9 +8,9 @@ namespace preemo{
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 		wgpuInstance = wgpuCreateInstance(nullptr);
 #else
-		wgpuInstance = wgpuCreateInstance(&desc);
+		wgpu_instance = wgpuCreateInstance(&desc);
 #endif
-		if (!wgpuInstance) {
+		if (!wgpu_instance) {
 			std::cerr << "Could not initialize WebGPU!" << std::endl;
 		}
 	}

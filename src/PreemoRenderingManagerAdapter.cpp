@@ -2,7 +2,7 @@
 
 namespace preemo {
 	RenderingManager::Adapter::Adapter(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options) {
-		wgpuAdapter = RequestAdapterSynchronous(instance, options);
+		wgpu_adapter = RequestAdapterSynchronous(instance, options);
 	}
 
 	wgpu::Adapter RenderingManager::Adapter::RequestAdapterSynchronous(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options) {
@@ -47,30 +47,6 @@ namespace preemo {
 		return userData.adapter;
 	}
 
-//#ifdef __EMSCRIPTEN__
-//	EM_ASYNC_JS(WGPUAdapter, RequestAdapterSynchronousAsync, (WGPUInstance instance, const WGPURequestAdapterOptions* options), {
-//		return new Promise((resolve, reject) = > {
-//			wgpuInstanceRequestAdapter(
-//				instance,
-//				options,
-//				(status, adapter, message, userdata) = > {
-//					if (status == = 0) { // WGPURequestAdapterStatus::Success
-//						resolve(adapter);
-//					}
-//					else {
-//						reject(new Error(message));
-//					}
-//				},
-//				null
-//			);
-//		});
-//	});
-//
-//	wgpu::Adapter RenderingManager::Adapter::RequestAdapterSynchronous(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options) {
-//		return RequestAdapterSynchronousAsync(instance, options);
-//	}
-//#endif
-
 	void RenderingManager::Adapter::Inspect()
 	{
 #ifndef WEBGPU_BACKEND_EMSCRIPTEN
@@ -79,7 +55,7 @@ namespace preemo {
 #ifdef WEBGPU_BACKEND_DAWN
 		bool success = wgpuAdapter.getLimits(&supportedLimits) == wgpu::Status::Success;
 #else
-		bool success = wgpuAdapterGetLimits(wgpuAdapter, &supportedLimits);
+		bool success = wgpuAdapterGetLimits(wgpu_adapter, &supportedLimits);
 #endif
 		if (success) {
 			std::cout << "Adapter limits:" << std::endl;
@@ -92,11 +68,11 @@ namespace preemo {
 
 		std::vector<WGPUFeatureName> features = {};
 
-		size_t featureCount = wgpuAdapter.enumerateFeatures(nullptr);
+		size_t featureCount = wgpu_adapter.enumerateFeatures(nullptr);
 
 		features.resize(featureCount);
 
-		wgpuAdapterEnumerateFeatures(wgpuAdapter, features.data());
+		wgpuAdapterEnumerateFeatures(wgpu_adapter, features.data());
 
 		std::cout << "Adapter features" << std::endl;
 		std::cout << std::hex; // Write integers as hexadecimal to ease comparison with webgpu.h literals
@@ -106,7 +82,7 @@ namespace preemo {
 		std::cout << std::dec; // Restore decimal numbers
 		wgpu::AdapterProperties properties = {};
 		properties.nextInChain = nullptr;
-		wgpuAdapter.getProperties(&properties);
+		wgpu_adapter.getProperties(&properties);
 		std::cout << "Adapter properties:" << std::endl;
 		std::cout << " - vendorID: " << properties.vendorID << std::endl;
 		if (properties.vendorName) {
@@ -128,4 +104,25 @@ namespace preemo {
 		std::cout << std::dec; // Restore decimal numbers
 
 	}
+
+	wgpu::RequiredLimits RenderingManager::Adapter::GetRequiredLimits()
+	{
+		wgpu::SupportedLimits supportedLimits;
+		wgpu_adapter.getLimits(&supportedLimits);
+
+		wgpu::RequiredLimits requiredLimits = wgpu::Default;
+
+		//PREEMO_TODO: Update required limits
+		requiredLimits.limits.maxVertexAttributes = 1;
+		requiredLimits.limits.maxVertexBuffers = 1;
+		requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
+		requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
+	
+		requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
+		requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
+	
+		return requiredLimits;
+	}
+
+
 }

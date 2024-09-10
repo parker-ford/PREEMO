@@ -4,22 +4,22 @@ namespace preemo {
 	RenderingManager::Surface::Surface() = default;
 
 	RenderingManager::Surface::Surface(wgpu::Instance instance, void* windowPtr) {
-		window = reinterpret_cast<GLFWwindow*>(windowPtr);
-		wgpuSurface = glfwGetWGPUSurface(instance, window);
+		m_window = reinterpret_cast<GLFWwindow*>(windowPtr);
+		wgpu_surface = glfwGetWGPUSurface(instance, m_window);
 	}
 
 	bool RenderingManager::Surface::ShouldClose() {
-		return glfwWindowShouldClose(window);
+		return glfwWindowShouldClose(m_window);
 	}
 
 	void RenderingManager::Surface::Configure(wgpu::SurfaceConfiguration* config) {
 		this->format = config->format;
-		wgpuSurfaceConfigure(wgpuSurface, config);
+		wgpuSurfaceConfigure(wgpu_surface, config);
 	}
 
 	wgpu::TextureView RenderingManager::Surface::GetNextSurfaceTextureView() {
 		WGPUSurfaceTexture surfaceTexture;
-		wgpuSurfaceGetCurrentTexture(wgpuSurface, &surfaceTexture);
+		wgpuSurfaceGetCurrentTexture(wgpu_surface, &surfaceTexture);
 		if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success) {
 			return nullptr;
 		}

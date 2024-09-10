@@ -32,20 +32,12 @@ namespace preemo {
 	void Root::Run()
 	{
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
-		//std::cout << "running.." << std::endl;
-		//auto callback = [](void* arg) {
-		//	//RenderingManager* p_RenderingManager = reinterpret_cast<RenderingManager*>(arg);
-		//	//std::cout << "a " << p_RenderingManager << std::endl;
-		//	//std::cout << "b " << g_RenderingManager << std::endl;
-		//	g_RenderingManager->MainLoop();
-		//	//p_RenderingManager->MainLoop();
-		//};
 		auto callback = [](void*) {
-			g_RenderingManager->MainLoop();
+			if (g_RenderingManager) {
+				g_RenderingManager->MainLoop();
+			}
 		};
-		std::cout << "global rendering manager before callback: " << g_RenderingManager << std::endl;
 		emscripten_set_main_loop_arg(callback, nullptr, 0, true);
-		//emscripten_set_main_loop_arg()
 #else
 		while (IsRunning()) {
 			g_RenderingManager->MainLoop();

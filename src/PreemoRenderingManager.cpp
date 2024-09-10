@@ -23,11 +23,11 @@ namespace preemo {
 		Instance instance = Instance();
 
 		// Initialize Surface
-		surface = Surface(instance.wgpuInstance, windowPtr);
+		m_surface = Surface(instance.wgpu_instance, windowPtr);
 
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
-		Adapter adapter(instance.wgpuInstance, &adapterOpts);
+		Adapter adapter(instance.wgpu_instance, &adapterOpts);
 		//adapter.Inspect();
 
 		// Request Device
@@ -56,12 +56,13 @@ namespace preemo {
 			};
 #endif
 
-
-		mDevice = Device(adapter, &deviceDesc);
+		wgpu::RequiredLimits requiredLimits = adapter.GetRequiredLimits();
+		deviceDesc.requiredLimits = &requiredLimits;
+		m_device = Device(adapter, &deviceDesc);
 		//device.Inspect();
 
 		// Initialize Queue
-		queue = wgpuDeviceGetQueue(mDevice.wgpuDevice);
+		m_queue = wgpuDeviceGetQueue(m_device.wgpu_device);
 
 		// Configure Surface
 		wgpu::SurfaceConfiguration config = {};
@@ -69,17 +70,17 @@ namespace preemo {
 		config.width = 640;
 		config.height = 480;
 		config.usage = wgpu::TextureUsage::RenderAttachment;
-		config.format = surface.wgpuSurface.getPreferredFormat(adapter.wgpuAdapter);
+		config.format = m_surface.wgpu_surface.getPreferredFormat(adapter.wgpu_adapter);
 		config.viewFormatCount = 0;
 		config.viewFormats = nullptr;
-		config.device = mDevice.wgpuDevice;
+		config.device = m_device.wgpu_device;
 		config.presentMode = wgpu::PresentMode::Fifo;
 		config.alphaMode = wgpu::CompositeAlphaMode::Auto;
-		surface.Configure(&config);
+		m_surface.Configure(&config);
 
 		//Release Adapter & Instance
-		adapter.wgpuAdapter.release();
-		instance.wgpuInstance.release();
+		adapter.wgpu_adapter.release();
+		instance.wgpu_instance.release();
 		
 		//pipeline = new RenderPipeline();
 	}
@@ -87,10 +88,10 @@ namespace preemo {
 	RenderingManager::~RenderingManager() {
 		//pipeline.Release();
 		//PREEMO_TODO: Make class level release/unconfigure methods
-		surface.wgpuSurface.unconfigure();
-		queue.release();
-		surface.wgpuSurface.release();
-		mDevice.wgpuDevice.release();
+		m_surface.wgpu_surface.unconfigure();
+		m_queue.release();
+		m_surface.wgpu_surface.release();
+		m_device.wgpu_device.release();
 	}
 
 	RenderingManager& RenderingManager::GetInstance()
@@ -102,7 +103,7 @@ namespace preemo {
 	{
 		glfwPollEvents();
 
-		WGPUTextureView targetView = surface.GetNextSurfaceTextureView();
+		WGPUTextureView targetView = m_surface.GetNextSurfaceTextureView();
 		if (!targetView) {
 			std::cout << "target View null" << std::endl;
 			return;
@@ -112,7 +113,7 @@ namespace preemo {
 		WGPUCommandEncoderDescriptor encoderDesc = {};
 		encoderDesc.nextInChain = nullptr;
 		encoderDesc.label = "My command encoder";
-		WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(mDevice.wgpuDevice, &encoderDesc);
+		WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_device.wgpu_device, &encoderDesc);
 
 		// Create the render pass that clears the screen with our color
 		WGPURenderPassDescriptor renderPassDesc = {};
@@ -137,7 +138,7 @@ namespace preemo {
 		// Create the render pass and end it immediately (we only clear the screen but do not draw anything)
 		wgpu::RenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
 
-		renderPass.setPipeline(pipeline->getWGPURenderPipeline());
+		renderPass.setPipeline(m_pipeline->getWGPURenderPipeline());
 		renderPass.draw(3, 1, 0, 0);
 
 		renderPass.end();
@@ -151,21 +152,21 @@ namespace preemo {
 		wgpuCommandEncoderRelease(encoder);
 
 		//std::cout << "Submitting command..." << std::endl;
-		wgpuQueueSubmit(queue, 1, &command);
+		wgpuQueueSubmit(m_queue, 1, &command);
 		wgpuCommandBufferRelease(command);
 		//std::cout << "Command submitted." << std::endl;
 
 		// At the end of the frame
 		wgpuTextureViewRelease(targetView);
 #ifndef __EMSCRIPTEN__
-		wgpuSurfacePresent(surface.wgpuSurface);
+		wgpuSurfacePresent(m_surface.wgpu_surface);
 #endif
 
 		// Also move here the tick/poll but NOT the emscripten sleep
 #if defined(WEBGPU_BACKEND_DAWN)
 		wgpuDeviceTick(mDevice.wgpuDevice);
 #elif defined(WEBGPU_BACKEND_WGPU)
-		wgpuDevicePoll(mDevice.wgpuDevice, false, nullptr);
+		wgpuDevicePoll(m_device.wgpu_device, false, nullptr);
 #elif defined(WEBGPU_BACKEND_EMSCRIPTEN)
 		std::cout << "main loop" << std::endl;
 #endif
@@ -173,26 +174,26 @@ namespace preemo {
 
 	bool RenderingManager::IsRunning()
 	{
-		return !surface.ShouldClose();
+		return !m_surface.ShouldClose();
 	}
 
 	wgpu::Device RenderingManager::getWGPUDevice()
 	{
-		return mDevice.wgpuDevice;
+		return m_device.wgpu_device;
 	}
 
 	RenderingManager::Surface RenderingManager::getSurface()
 	{
-		return surface;
+		return m_surface;
 	}
 
 	RenderingManager::Device RenderingManager::getDevice()
 	{
-		return mDevice;
+		return m_device;
 	}
 
 	void RenderingManager::TestPipeline()
 	{
-		pipeline = new RenderPipeline();
+		m_pipeline = new RenderPipeline();
 	}
 }

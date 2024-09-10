@@ -30,7 +30,7 @@ namespace preemo {
 		public:
 			Instance();
 		private:
-			wgpu::Instance wgpuInstance;
+			wgpu::Instance wgpu_instance;
 		};
 
 		class Adapter {
@@ -39,10 +39,11 @@ namespace preemo {
 		public:
 			Adapter(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options);
 			void Inspect();
+			wgpu::RequiredLimits GetRequiredLimits();
 		private:
 			wgpu::Adapter RequestAdapterSynchronous(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options);
 		private:
-			wgpu::Adapter wgpuAdapter;
+			wgpu::Adapter wgpu_adapter;
 		};
 
 		class Device {
@@ -54,7 +55,7 @@ namespace preemo {
 		private:
 			wgpu::Device RequestDeviceSynchronous(wgpu::Adapter adapter, wgpu::DeviceDescriptor const* descriptor);
 		private:
-			wgpu::Device wgpuDevice;
+			wgpu::Device wgpu_device;
 		};
 
 		class Surface {
@@ -68,8 +69,8 @@ namespace preemo {
 		public:
 			wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 		private:
-			wgpu::Surface wgpuSurface;
-			GLFWwindow* window;
+			wgpu::Surface wgpu_surface;
+			GLFWwindow* m_window;
 		};
 
 	public:
@@ -93,10 +94,10 @@ namespace preemo {
 		~RenderingManager();
 	private:
 		//PREEMO_TODO: Need to consider making these pointers
-		wgpu::Queue queue;
-		Device mDevice;
-		Surface surface;
-		RenderPipeline* pipeline;
+		wgpu::Queue m_queue;
+		Device m_device;
+		Surface m_surface;
+		RenderPipeline* m_pipeline;
 	};
 }
 
