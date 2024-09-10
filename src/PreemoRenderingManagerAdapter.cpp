@@ -47,6 +47,30 @@ namespace preemo {
 		return userData.adapter;
 	}
 
+//#ifdef __EMSCRIPTEN__
+//	EM_ASYNC_JS(WGPUAdapter, RequestAdapterSynchronousAsync, (WGPUInstance instance, const WGPURequestAdapterOptions* options), {
+//		return new Promise((resolve, reject) = > {
+//			wgpuInstanceRequestAdapter(
+//				instance,
+//				options,
+//				(status, adapter, message, userdata) = > {
+//					if (status == = 0) { // WGPURequestAdapterStatus::Success
+//						resolve(adapter);
+//					}
+//					else {
+//						reject(new Error(message));
+//					}
+//				},
+//				null
+//			);
+//		});
+//	});
+//
+//	wgpu::Adapter RenderingManager::Adapter::RequestAdapterSynchronous(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options) {
+//		return RequestAdapterSynchronousAsync(instance, options);
+//	}
+//#endif
+
 	void RenderingManager::Adapter::Inspect()
 	{
 #ifndef WEBGPU_BACKEND_EMSCRIPTEN

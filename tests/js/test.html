@@ -9,7 +9,7 @@
     <canvas id="canvas"></canvas>
     <script src="../../out/build/release-emscripten/PREEMO.js"></script>
     <script>
-        createModule().then(function(Module) {
+        createModule().then( async function(Module) {
             try {
                 console.log(Module);
                 const root = new Module.Root();

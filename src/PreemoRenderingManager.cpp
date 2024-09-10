@@ -80,7 +80,8 @@ namespace preemo {
 		//Release Adapter & Instance
 		adapter.wgpuAdapter.release();
 		instance.wgpuInstance.release();
-
+		
+		//pipeline = new RenderPipeline();
 	}
 
 	RenderingManager::~RenderingManager() {
@@ -136,8 +137,8 @@ namespace preemo {
 		// Create the render pass and end it immediately (we only clear the screen but do not draw anything)
 		wgpu::RenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
 
-		//renderPass.setPipeline(pipeline.getWGPURenderPipeline());
-		//renderPass.draw(3, 1, 0, 0);
+		renderPass.setPipeline(pipeline->getWGPURenderPipeline());
+		renderPass.draw(3, 1, 0, 0);
 
 		renderPass.end();
 		renderPass.release();
@@ -183,5 +184,15 @@ namespace preemo {
 	RenderingManager::Surface RenderingManager::getSurface()
 	{
 		return surface;
+	}
+
+	RenderingManager::Device RenderingManager::getDevice()
+	{
+		return mDevice;
+	}
+
+	void RenderingManager::TestPipeline()
+	{
+		pipeline = new RenderPipeline();
 	}
 }

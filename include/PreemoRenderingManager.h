@@ -15,7 +15,7 @@
 #include <cassert>
 #include <vector>
 
-//#include "PreemoRenderPipeline.h"
+#include "PreemoRenderPipeline.h"
 
 namespace preemo {
 	class RenderingManager {
@@ -84,7 +84,9 @@ namespace preemo {
 		bool IsRunning();
 		wgpu::Device getWGPUDevice();
 		Surface getSurface();
+		Device getDevice();
 
+		void TestPipeline();
 
 	private:
 		RenderingManager(void* windowPtr);
@@ -94,7 +96,7 @@ namespace preemo {
 		wgpu::Queue queue;
 		Device mDevice;
 		Surface surface;
-		//RenderPipeline pipeline;
+		RenderPipeline* pipeline;
 	};
 }
 

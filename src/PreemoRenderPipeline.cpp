@@ -1,6 +1,9 @@
 #include "PreemoRenderPipeline.h"
+#include "PreemoRenderingManager.h"
 
 namespace preemo {
+
+	extern RenderingManager* g_RenderingManager;
 
 	// We embbed the source of the shader module here
 	const char* shaderSource = R"(
@@ -30,93 +33,95 @@ namespace preemo {
 		shaderDesc.hintCount = 0;
 		shaderDesc.hints = nullptr;
 #endif
+		std::cout << "Global Rendering Manager Pointer: " << g_RenderingManager << std::endl;
 
-		//// We use the extension mechanism to specify the WGSL part of the shader module descriptor
-		//wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
-		//// Set the chained struct's header
-		//shaderCodeDesc.chain.next = nullptr;
-		//shaderCodeDesc.chain.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
-		//// Connect the chain
-		//shaderDesc.nextInChain = &shaderCodeDesc.chain;
-		//shaderCodeDesc.code = shaderSource;
-		//wgpu::ShaderModule shaderModule = gRenderingManager.getWGPUDevice().createShaderModule(shaderDesc);
+
+		// We use the extension mechanism to specify the WGSL part of the shader module descriptor
+		wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
+		// Set the chained struct's header
+		shaderCodeDesc.chain.next = nullptr;
+		shaderCodeDesc.chain.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+		// Connect the chain
+		shaderDesc.nextInChain = &shaderCodeDesc.chain;
+		shaderCodeDesc.code = shaderSource;
+		wgpu::ShaderModule shaderModule = g_RenderingManager->getWGPUDevice().createShaderModule(shaderDesc);
 
 		//// Create the render pipeline
-		//wgpu::RenderPipelineDescriptor pipelineDesc;
+		wgpu::RenderPipelineDescriptor pipelineDesc;
 
 		//// We do not use any vertex buffer for this first simplistic example
-		//pipelineDesc.vertex.bufferCount = 0;
-		//pipelineDesc.vertex.buffers = nullptr;
+		pipelineDesc.vertex.bufferCount = 0;
+		pipelineDesc.vertex.buffers = nullptr;
 
 		//// NB: We define the 'shaderModule' in the second part of this chapter.
 		//// Here we tell that the programmable vertex shader stage is described
 		//// by the function called 'vs_main' in that module.
-		//pipelineDesc.vertex.module = shaderModule;
-		//pipelineDesc.vertex.entryPoint = "vs_main";
-		//pipelineDesc.vertex.constantCount = 0;
-		//pipelineDesc.vertex.constants = nullptr;
+		pipelineDesc.vertex.module = shaderModule;
+		pipelineDesc.vertex.entryPoint = "vs_main";
+		pipelineDesc.vertex.constantCount = 0;
+		pipelineDesc.vertex.constants = nullptr;
 
 		//// Each sequence of 3 vertices is considered as a triangle
-		//pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+		pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
 		//// We'll see later how to specify the order in which vertices should be
 		//// connected. When not specified, vertices are considered sequentially.
-		//pipelineDesc.primitive.stripIndexFormat = wgpu::IndexFormat::Undefined;
+		pipelineDesc.primitive.stripIndexFormat = wgpu::IndexFormat::Undefined;
 
 		//// The face orientation is defined by assuming that when looking
 		//// from the front of the face, its corner vertices are enumerated
 		//// in the counter-clockwise (CCW) order.
-		//pipelineDesc.primitive.frontFace = wgpu::FrontFace::CCW;
+		pipelineDesc.primitive.frontFace = wgpu::FrontFace::CCW;
 
 		//// But the face orientation does not matter much because we do not
 		//// cull (i.e. "hide") the faces pointing away from us (which is often
 		//// used for optimization).
-		//pipelineDesc.primitive.cullMode = wgpu::CullMode::None;
+		pipelineDesc.primitive.cullMode = wgpu::CullMode::None;
 
 		//// We tell that the programmable fragment shader stage is described
 		//// by the function called 'fs_main' in the shader module.
-		//wgpu::FragmentState fragmentState;
-		//fragmentState.module = shaderModule;
-		//fragmentState.entryPoint = "fs_main";
-		//fragmentState.constantCount = 0;
-		//fragmentState.constants = nullptr;
+		wgpu::FragmentState fragmentState;
+		fragmentState.module = shaderModule;
+		fragmentState.entryPoint = "fs_main";
+		fragmentState.constantCount = 0;
+		fragmentState.constants = nullptr;
 
-		//wgpu::BlendState blendState;
-		//blendState.color.srcFactor = wgpu::BlendFactor::SrcAlpha;
-		//blendState.color.dstFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
-		//blendState.color.operation = wgpu::BlendOperation::Add;
-		//blendState.alpha.srcFactor = wgpu::BlendFactor::Zero;
-		//blendState.alpha.dstFactor = wgpu::BlendFactor::One;
-		//blendState.alpha.operation = wgpu::BlendOperation::Add;
+		wgpu::BlendState blendState;
+		blendState.color.srcFactor = wgpu::BlendFactor::SrcAlpha;
+		blendState.color.dstFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
+		blendState.color.operation = wgpu::BlendOperation::Add;
+		blendState.alpha.srcFactor = wgpu::BlendFactor::Zero;
+		blendState.alpha.dstFactor = wgpu::BlendFactor::One;
+		blendState.alpha.operation = wgpu::BlendOperation::Add;
 
-		//wgpu::ColorTargetState colorTarget;
-		//colorTarget.format = gRenderingManager.getSurface().format;
-		//colorTarget.blend = &blendState;
-		//colorTarget.writeMask = wgpu::ColorWriteMask::All; // We could write to only some of the color channels.
+		wgpu::ColorTargetState colorTarget;
+		colorTarget.format = g_RenderingManager->getSurface().format;
+		colorTarget.blend = &blendState;
+		colorTarget.writeMask = wgpu::ColorWriteMask::All; // We could write to only some of the color channels.
 
 		//// We have only one target because our render pass has only one output color
 		//// attachment.
-		//fragmentState.targetCount = 1;
-		//fragmentState.targets = &colorTarget;
-		//pipelineDesc.fragment = &fragmentState;
+		fragmentState.targetCount = 1;
+		fragmentState.targets = &colorTarget;
+		pipelineDesc.fragment = &fragmentState;
 
 		//// We do not use stencil/depth testing for now
-		//pipelineDesc.depthStencil = nullptr;
+		pipelineDesc.depthStencil = nullptr;
 
 		//// Samples per pixel
-		//pipelineDesc.multisample.count = 1;
+		pipelineDesc.multisample.count = 1;
 
 		//// Default value for the mask, meaning "all bits on"
-		//pipelineDesc.multisample.mask = ~0u;
+		pipelineDesc.multisample.mask = ~0u;
 
 		//// Default value as well (irrelevant for count = 1 anyways)
-		//pipelineDesc.multisample.alphaToCoverageEnabled = false;
-		//pipelineDesc.layout = nullptr;
+		pipelineDesc.multisample.alphaToCoverageEnabled = false;
+		pipelineDesc.layout = nullptr;
 
-		//wgpuRenderPipeline = gRenderingManager.getWGPUDevice().createRenderPipeline(pipelineDesc);
+		wgpuRenderPipeline = g_RenderingManager->getWGPUDevice().createRenderPipeline(pipelineDesc);
 
 		//// We no longer need to access the shader module
-		//shaderModule.release();
+		shaderModule.release();
 	}
 	void RenderPipeline::Release()
 	{

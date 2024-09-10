@@ -5,6 +5,13 @@
 #include <cassert>
 #include <vector>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/val.h>
+#include <emscripten/html5.h>
+#endif // __EMSCRIPTEN__
+
+
 namespace preemo {
 
 	class Root {
