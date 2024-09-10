@@ -7,24 +7,16 @@ namespace preemo {
 
 	// We embbed the source of the shader module here
 	const char* shaderSource = R"(
-		@vertex
-		fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
-			var p = vec2f(0.0, 0.0);
-			if (in_vertex_index == 0u) {
-				p = vec2f(-0.5, -0.5);
-			} else if (in_vertex_index == 1u) {
-				p = vec2f(0.5, -0.5);
-			} else {
-				p = vec2f(0.0, 0.5);
-			}
-			return vec4f(p, 0.0, 1.0);
-		}
+	@vertex
+	fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
+		return vec4f(in_vertex_position, 0.0, 1.0);
+	}
 
-		@fragment
-		fn fs_main() -> @location(0) vec4f {
-			return vec4f(0.0, 0.4, 1.0, 1.0);
-		}
-		)";
+	@fragment
+	fn fs_main() -> @location(0) vec4f {
+		return vec4f(0.0, 0.4, 1.0, 1.0);
+	}
+	)";
 
 	RenderPipeline::RenderPipeline() {
 		// Load the shader module
@@ -49,9 +41,22 @@ namespace preemo {
 		//// Create the render pipeline
 		wgpu::RenderPipelineDescriptor pipelineDesc;
 
+		//Configure vertex pipeline
+		wgpu::VertexBufferLayout vertexBufferLayout;
+		wgpu::VertexAttribute positionAttrib;
+		positionAttrib.shaderLocation = 0;
+		positionAttrib.format = wgpu::VertexFormat::Float32x2;
+		positionAttrib.offset = 0;
+
+		vertexBufferLayout.attributeCount = 1;
+		vertexBufferLayout.attributes = &positionAttrib;
+
+		vertexBufferLayout.arrayStride = 2 * sizeof(float);
+		vertexBufferLayout.stepMode = wgpu::VertexStepMode::Vertex;
+
 		//// We do not use any vertex buffer for this first simplistic example
-		pipelineDesc.vertex.bufferCount = 0;
-		pipelineDesc.vertex.buffers = nullptr;
+		pipelineDesc.vertex.bufferCount = 1;
+		pipelineDesc.vertex.buffers = &vertexBufferLayout;
 
 		//// NB: We define the 'shaderModule' in the second part of this chapter.
 		//// Here we tell that the programmable vertex shader stage is described

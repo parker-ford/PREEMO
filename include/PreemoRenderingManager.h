@@ -87,7 +87,9 @@ namespace preemo {
 		Surface getSurface();
 		Device getDevice();
 
+		//Testing
 		void TestPipeline();
+		void TestBuffers();
 
 	private:
 		RenderingManager(void* windowPtr);
@@ -97,7 +99,11 @@ namespace preemo {
 		wgpu::Queue m_queue;
 		Device m_device;
 		Surface m_surface;
+
+		//Testing
 		RenderPipeline* m_pipeline;
+		uint32_t vertexCount;
+		wgpu::Buffer vertexBuffer;
 	};
 }
 

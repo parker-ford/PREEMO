@@ -6,7 +6,7 @@ namespace preemo{
 		desc.nextInChain = nullptr;
 
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
-		wgpuInstance = wgpuCreateInstance(nullptr);
+		wgpu_instance = wgpuCreateInstance(nullptr);
 #else
 		wgpu_instance = wgpuCreateInstance(&desc);
 #endif

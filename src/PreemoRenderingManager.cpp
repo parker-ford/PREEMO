@@ -81,8 +81,6 @@ namespace preemo {
 		//Release Adapter & Instance
 		adapter.wgpu_adapter.release();
 		instance.wgpu_instance.release();
-		
-		//pipeline = new RenderPipeline();
 	}
 
 	RenderingManager::~RenderingManager() {
@@ -117,14 +115,13 @@ namespace preemo {
 
 		// Create the render pass that clears the screen with our color
 		WGPURenderPassDescriptor renderPassDesc = {};
-		renderPassDesc.nextInChain = nullptr;
 
 		// The attachment part of the render pass descriptor describes the target texture of the pass
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
 		renderPassColorAttachment.view = targetView;
 		renderPassColorAttachment.resolveTarget = nullptr;
-		renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
-		renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+		renderPassColorAttachment.loadOp = wgpu::LoadOp::Clear;
+		renderPassColorAttachment.storeOp = wgpu::StoreOp::Store;
 		renderPassColorAttachment.clearValue = WGPUColor{ 0.9, 0.1, 0.2, 1.0 };
 #ifndef WEBGPU_BACKEND_WGPU
 		renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
@@ -139,7 +136,11 @@ namespace preemo {
 		wgpu::RenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
 
 		renderPass.setPipeline(m_pipeline->getWGPURenderPipeline());
-		renderPass.draw(3, 1, 0, 0);
+
+		renderPass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
+
+
+		renderPass.draw(vertexCount, 1, 0, 0);
 
 		renderPass.end();
 		renderPass.release();
@@ -196,4 +197,30 @@ namespace preemo {
 	{
 		m_pipeline = new RenderPipeline();
 	}
+
+	void RenderingManager::TestBuffers()
+	{
+		std::vector<float> vertexData = {
+			// Define a first triangle:
+			-0.5, -0.5,
+			+0.5, -0.5,
+			+0.0, +0.5,
+
+			// Add a second triangle:
+			-0.55f, -0.5,
+			-0.05f, +0.5,
+			-0.55f, +0.5
+		};
+		vertexCount = static_cast<uint32_t>(vertexData.size() / 2);
+
+		wgpu::BufferDescriptor bufferDesc;
+		bufferDesc.size = vertexData.size() * sizeof(float);
+		bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
+		bufferDesc.mappedAtCreation = false;
+		vertexBuffer = m_device.wgpu_device.createBuffer(bufferDesc);
+
+		//write geometry data to the buffer
+		m_queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferDesc.size);
+	}
+
 }

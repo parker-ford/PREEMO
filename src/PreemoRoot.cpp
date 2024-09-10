@@ -13,8 +13,8 @@ namespace preemo {
 		}
 
 		//PREEMO_TODO: Remove this
+		g_RenderingManager->TestBuffers();
 		g_RenderingManager->TestPipeline();
-
 
 		return true;
 	}
