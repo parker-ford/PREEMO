@@ -102,8 +102,9 @@ namespace preemo {
 
 		//Testing
 		RenderPipeline* m_pipeline;
-		uint32_t vertexCount;
-		wgpu::Buffer vertexBuffer;
+		uint32_t indexCount;
+		wgpu::Buffer pointBuffer;
+		wgpu::Buffer indexBuffer;
 	};
 }
 

@@ -6,6 +6,7 @@ namespace preemo {
 	extern RenderingManager* g_RenderingManager;
 
 	// We embbed the source of the shader module here
+	// We embbed the source of the shader module here
 	const char* shaderSource = R"(
 	/**
 	 * A structure with fields labeled with vertex attribute locations can be used
@@ -34,7 +35,8 @@ namespace preemo {
 	fn vs_main(in: VertexInput) -> VertexOutput {
 		//                         ^^^^^^^^^^^^ We return a custom struct
 		var out: VertexOutput; // create the output struct
-		out.position = vec4f(in.position, 0.0, 1.0); // same as what we used to directly return
+		let ratio = 640.0 / 480.0; // The width and height of the target surface
+		out.position = vec4f(in.position.x, in.position.y * ratio, 0.0, 1.0);
 		out.color = in.color; // forward the color attribute to the fragment shader
 		return out;
 	}
@@ -53,8 +55,6 @@ namespace preemo {
 		shaderDesc.hintCount = 0;
 		shaderDesc.hints = nullptr;
 #endif
-		std::cout << "Global Rendering Manager Pointer: " << g_RenderingManager << std::endl;
-
 
 		// We use the extension mechanism to specify the WGSL part of the shader module descriptor
 		wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
