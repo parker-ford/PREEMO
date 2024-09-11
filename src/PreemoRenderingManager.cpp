@@ -201,17 +201,20 @@ namespace preemo {
 	void RenderingManager::TestBuffers()
 	{
 		std::vector<float> vertexData = {
-			// Define a first triangle:
-			-0.5, -0.5,
-			+0.5, -0.5,
-			+0.0, +0.5,
+			// x0,  y0,  r0,  g0,  b0
+			-0.5, -0.5, 1.0, 0.0, 0.0,
 
-			// Add a second triangle:
-			-0.55f, -0.5,
-			-0.05f, +0.5,
-			-0.55f, +0.5
+			// x1,  y1,  r1,  g1,  b1
+			+0.5, -0.5, 0.0, 1.0, 0.0,
+
+			// ...
+			+0.0,   +0.5, 0.0, 0.0, 1.0,
+			-0.55f, -0.5, 1.0, 1.0, 0.0,
+			-0.05f, +0.5, 1.0, 0.0, 1.0,
+			-0.55f, +0.5, 0.0, 1.0, 1.0
 		};
-		vertexCount = static_cast<uint32_t>(vertexData.size() / 2);
+
+		vertexCount = static_cast<uint32_t>(vertexData.size() / 5);
 
 		wgpu::BufferDescriptor bufferDesc;
 		bufferDesc.size = vertexData.size() * sizeof(float);

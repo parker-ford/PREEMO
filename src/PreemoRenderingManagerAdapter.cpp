@@ -113,10 +113,12 @@ namespace preemo {
 		wgpu::RequiredLimits requiredLimits = wgpu::Default;
 
 		//PREEMO_TODO: Update required limits
-		requiredLimits.limits.maxVertexAttributes = 1;
+		requiredLimits.limits.maxVertexAttributes = 2;
 		requiredLimits.limits.maxVertexBuffers = 1;
-		requiredLimits.limits.maxBufferSize = 6 * 2 * sizeof(float);
-		requiredLimits.limits.maxVertexBufferArrayStride = 2 * sizeof(float);
+		requiredLimits.limits.maxBufferSize = 6 * 5 * sizeof(float);
+		requiredLimits.limits.maxVertexBufferArrayStride = 5 * sizeof(float);
+
+		requiredLimits.limits.maxInterStageShaderComponents = 3;
 	
 		requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
 		requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;

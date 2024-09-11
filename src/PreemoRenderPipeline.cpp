@@ -7,14 +7,42 @@ namespace preemo {
 
 	// We embbed the source of the shader module here
 	const char* shaderSource = R"(
+	/**
+	 * A structure with fields labeled with vertex attribute locations can be used
+	 * as input to the entry point of a shader.
+	 */
+	struct VertexInput {
+		@location(0) position: vec2f,
+		@location(1) color: vec3f,
+	};
+
+	/**
+	 * A structure with fields labeled with builtins and locations can also be used
+	 * as *output* of the vertex shader, which is also the input of the fragment
+	 * shader.
+	 */
+	struct VertexOutput {
+		@builtin(position) position: vec4f,
+		// The location here does not refer to a vertex attribute, it just means
+		// that this field must be handled by the rasterizer.
+		// (It can also refer to another field of another struct that would be used
+		// as input to the fragment shader.)
+		@location(0) color: vec3f,
+	};
+
 	@vertex
-	fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
-		return vec4f(in_vertex_position, 0.0, 1.0);
+	fn vs_main(in: VertexInput) -> VertexOutput {
+		//                         ^^^^^^^^^^^^ We return a custom struct
+		var out: VertexOutput; // create the output struct
+		out.position = vec4f(in.position, 0.0, 1.0); // same as what we used to directly return
+		out.color = in.color; // forward the color attribute to the fragment shader
+		return out;
 	}
 
 	@fragment
-	fn fs_main() -> @location(0) vec4f {
-		return vec4f(0.0, 0.4, 1.0, 1.0);
+	fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+		//     ^^^^^^^^^^^^^^^^ Use for instance the same struct as what the vertex outputs
+		return vec4f(in.color, 1.0); // use the interpolated color coming from the vertex shader
 	}
 	)";
 
@@ -41,17 +69,23 @@ namespace preemo {
 		//// Create the render pipeline
 		wgpu::RenderPipelineDescriptor pipelineDesc;
 
+
 		//Configure vertex pipeline
 		wgpu::VertexBufferLayout vertexBufferLayout;
-		wgpu::VertexAttribute positionAttrib;
-		positionAttrib.shaderLocation = 0;
-		positionAttrib.format = wgpu::VertexFormat::Float32x2;
-		positionAttrib.offset = 0;
+		std::vector<wgpu::VertexAttribute> vertexAttribs(2);
 
-		vertexBufferLayout.attributeCount = 1;
-		vertexBufferLayout.attributes = &positionAttrib;
+		vertexAttribs[0].shaderLocation = 0; //@location(0)
+		vertexAttribs[0].format = wgpu::VertexFormat::Float32x2;
+		vertexAttribs[0].offset = 0;
 
-		vertexBufferLayout.arrayStride = 2 * sizeof(float);
+		vertexAttribs[1].shaderLocation = 1; //@location(1)
+		vertexAttribs[1].format = wgpu::VertexFormat::Float32x3;
+		vertexAttribs[1].offset = 2 * sizeof(float);
+
+		vertexBufferLayout.attributeCount = static_cast<uint32_t>(vertexAttribs.size());
+		vertexBufferLayout.attributes = vertexAttribs.data();
+
+		vertexBufferLayout.arrayStride = 5 * sizeof(float);
 		vertexBufferLayout.stepMode = wgpu::VertexStepMode::Vertex;
 
 		//// We do not use any vertex buffer for this first simplistic example
