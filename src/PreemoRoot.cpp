@@ -12,6 +12,9 @@ namespace preemo {
 			return false;
 		}
 
+		std::cout << __FILE__ << std::endl;
+		std::cout << __LINE__ << std::endl;
+
 		//PREEMO_TODO: Remove this
 		g_RenderingManager->TestBuffers();
 		g_RenderingManager->TestPipeline();

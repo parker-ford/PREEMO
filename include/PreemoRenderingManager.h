@@ -13,8 +13,12 @@
 
 #include <iostream>
 #include <cassert>
-#include <vector>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
 
+namespace fs = std::filesystem;
 #include "PreemoRenderPipeline.h"
 
 namespace preemo {

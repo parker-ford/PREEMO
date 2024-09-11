@@ -18,6 +18,12 @@ int main() {
         std::cout << "Failed to initialize PREEMO." << std::endl;
     }
 
+    /*
+    *   preemo::Scene scene;
+    *   scene.add()
+    *   preemo::SceneEntity entity
+    */
+
     root.Run();
     
     glfwTerminate();

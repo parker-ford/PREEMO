@@ -76,7 +76,10 @@ else()
 		PREEMO
 		glfw
 	)
-	target_include_directories(PREEMO_standalone PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	target_include_directories(PREEMO_standalone PRIVATE 
+		${CMAKE_CURRENT_SOURCE_DIR}/include 
+		${CMAKE_CURRENT_SOURCE_DIR}/external
+	)
 endif()
 
 # Set include directories

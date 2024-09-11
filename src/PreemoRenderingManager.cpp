@@ -62,6 +62,7 @@ namespace preemo {
 		//device.Inspect();
 
 		// Initialize Queue
+		// PREEMO_TODO: Look into implicit casting to avoid having to write code like this. Example: https://www.youtube.com/watch?v=D4hz0wEB978&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=78 @ 20:00
 		m_queue = wgpuDeviceGetQueue(m_device.wgpu_device);
 
 		// Configure Surface
@@ -151,7 +152,7 @@ namespace preemo {
 		WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
 		cmdBufferDescriptor.nextInChain = nullptr;
 		cmdBufferDescriptor.label = "Command buffer";
-		WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
+		WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor)w
 		wgpuCommandEncoderRelease(encoder);
 
 		//std::cout << "Submitting command..." << std::endl;
@@ -233,6 +234,81 @@ namespace preemo {
 		indexBuffer = m_device.wgpu_device.createBuffer(bufferDesc);
 
 		m_queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
+	}
+
+	wgpu::ShaderModule loadShaderModule(const fs::path& path, wgpu::Device device) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			return nullptr;
+		}
+		file.seekg(0, std::ios::end);
+		size_t size = file.tellg();
+		std::string shaderSource(size, ' ');
+		file.seekg(0);
+		file.read(shaderSource.data(), size);
+
+		wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
+		shaderCodeDesc.chain.next = nullptr;
+		shaderCodeDesc.chain.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+		shaderCodeDesc.code = shaderSource.c_str();
+		wgpu::ShaderModuleDescriptor shaderDesc;
+		shaderDesc.nextInChain = &shaderCodeDesc.chain;
+#ifdef WEBGPU_BACKEND_WGPU
+		shaderDesc.hintCount = 0;
+		shaderDesc.hints = nullptr;
+#endif
+
+		return device.createShaderModule(shaderDesc);
+	}
+
+	bool loadGeometry(const fs::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			return false;
+		}
+
+		pointData.clear();
+		indexData.clear();
+
+		enum class Section {
+			None,
+			Points,
+			Indices,
+		};
+		Section currentSection = Section::None;
+
+		float value;
+		uint16_t index;
+		std::string line;
+		while (!file.eof()) {
+			getline(file, line);
+			if (line == "[points]") {
+				currentSection = Section::Points;
+			}
+			else if (line == "[indices]") {
+				currentSection = Section::Indices;
+			}
+			else if (line[0] == '#' || line.empty()) {
+				// Do nothing, this is a comment
+			}
+			else if (currentSection == Section::Points) {
+				std::istringstream iss(line);
+				// Get x, y, r, g, b
+				for (int i = 0; i < 5; ++i) {
+					iss >> value;
+					pointData.push_back(value);
+				}
+			}
+			else if (currentSection == Section::Indices) {
+				std::istringstream iss(line);
+				// Get corners #0 #1 and #2
+				for (int i = 0; i < 3; ++i) {
+					iss >> index;
+					indexData.push_back(index);
+				}
+			}
+		}
+		return true;
 	}
 
 }
