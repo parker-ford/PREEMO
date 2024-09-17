@@ -1,5 +1,6 @@
 #include "PreemoScene.h"
-#include "PreemoEntity.h"
+#include "Components.h"
+#include "PreemoScriptableEntity.h"
 
 namespace preemo {
 	Scene::Scene()
@@ -23,13 +24,14 @@ namespace preemo {
 	{
 		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nativeScriptComponent)
 			{
-				(void)entity;
+				//(void)entity;
 				if (!nativeScriptComponent.Instance) {
-					nativeScriptComponent.InstantiateFunction();
-					nativeScriptComponent.OnCreateFunction(nativeScriptComponent.Instance);
+					nativeScriptComponent.Instance = nativeScriptComponent.InstantiateScript();
+					nativeScriptComponent.Instance->m_Entity = Entity{ entity, this };
+					nativeScriptComponent.Instance->OnCreate();
 				}
 
-				nativeScriptComponent.OnUpdateFunction(nativeScriptComponent.Instance);
+				nativeScriptComponent.Instance->OnUpdate();
 			}
 		);
 	}

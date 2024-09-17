@@ -37,6 +37,9 @@ int main() {
         }
         void OnUpdate() {
             std::cout << "UPDATE" << std::endl;
+            if (HasComponent<preemo::TransformComponent>()) {
+                std::cout << "HAS" << std::endl;
+            }
         }
         void OnDestroy() {
 
