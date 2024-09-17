@@ -1,6 +1,9 @@
-#include "PreemoRoot.h"
+//#include "PreemoRoot.h"
+#include "Preemo.h"
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include "flecs.h"
+
 
 int main() {
     glfwInit();
@@ -18,13 +21,30 @@ int main() {
         std::cout << "Failed to initialize PREEMO." << std::endl;
     }
 
-    /*
-    *   preemo::Scene scene;
-    *   scene.add()
-    *   preemo::SceneEntity entity
-    */
+    preemo::Scene scene;
+    preemo::Entity ent = scene.CreateEntity();
+    ent.AddComponent<preemo::TransformComponent>();
+    if (ent.HasComponent<preemo::TransformComponent>()) {
+        std::cout << "found transform " << std::endl;
+    }
+    else {
+        std::cout << "Did not find transform" << std::endl;
+    }
+    class Controller : public preemo::ScriptableEntity {
+    public:
+        void OnCreate() {
+            std::cout << "CONTROLLER CREATED!" << std::endl;
+        }
+        void OnUpdate() {
+            std::cout << "UPDATE" << std::endl;
+        }
+        void OnDestroy() {
 
-    root.Run();
+        }
+    };
+    ent.AddComponent<preemo::NativeScriptComponent>().Bind<Controller>();
+
+    root.Run(&scene);
     
     glfwTerminate();
 

@@ -14,8 +14,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
 # Fetch and include Google Test
+include(FetchContent)
 if(NOT EMSCRIPTEN)
-	include(FetchContent)
 	FetchContent_Declare(
 		googletest
 		URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
@@ -33,6 +33,14 @@ else()
 	target_link_options(glfw INTERFACE -sUSE_GLFW=3)
 endif()
 
+# Add Flecs
+FetchContent_Declare(
+  flecs
+  GIT_REPOSITORY https://github.com/SanderMertens/flecs.git
+)
+
+FetchContent_MakeAvailable(flecs)
+
 # Add WebGPU
 add_subdirectory(external/webgpu)
 
@@ -43,29 +51,30 @@ add_subdirectory(external/glfw3webgpu)
 # file(GLOB_RECURSE PREEMO_SOURCES "src/*.cpp")
 
 # Create the library
+set(PREEMO_SOURCES
+    src/PreemoRoot.cpp
+    src/PreemoRenderingManager.cpp
+    src/PreemoRenderingManagerAdapter.cpp
+    src/PreemoRenderingManagerDevice.cpp
+    src/PreemoRenderingManagerSurface.cpp
+    src/PreemoRenderingManagerInstance.cpp
+    src/PreemoRenderPipeline.cpp
+    src/PreemoScene.cpp
+    src/PreemoEntity.cpp
+	src/PreemoScriptableEntity.cpp
+    include/Components.h
+    src/webgpu_impl.cpp
+	src/PreemoSceneManager.cpp
+)
 if(EMSCRIPTEN)
 	add_executable(PREEMO 
-		src/PreemoRoot.cpp
-		src/PreemoRenderingManager.cpp
-		src/PreemoRenderingManagerAdapter.cpp
-		src/PreemoRenderingManagerDevice.cpp
-		src/PreemoRenderingManagerSurface.cpp
-		src/PreemoRenderingManagerInstance.cpp
-		src/PreemoRenderPipeline.cpp
-		src/webgpu_impl.cpp
+		${PREEMO_SOURCES}
 		${CMAKE_BINARY_DIR}/intermediate/webidl_wrapper.cpp
 	)
 	include_directories(${CMAKE_BINARY_DIR}/intermediate)
 else()
 	add_library(PREEMO
-		src/PreemoRoot.cpp
-		src/PreemoRenderingManager.cpp
-		src/PreemoRenderingManagerAdapter.cpp
-		src/PreemoRenderingManagerDevice.cpp
-		src/PreemoRenderingManagerSurface.cpp
-		src/PreemoRenderingManagerInstance.cpp
-		src/PreemoRenderPipeline.cpp
-		src/webgpu_impl.cpp
+		${PREEMO_SOURCES}
 	)
 
 	# Add a new executable target for direct running
@@ -75,17 +84,32 @@ else()
 	target_link_libraries(PREEMO_standalone 
 		PREEMO
 		glfw
+		flecs::flecs_static # TESTING
 	)
-	target_include_directories(PREEMO_standalone PRIVATE 
-		${CMAKE_CURRENT_SOURCE_DIR}/include 
-		${CMAKE_CURRENT_SOURCE_DIR}/external
+	set_target_properties(PREEMO_standalone PROPERTIES
+		CXX_STANDARD 17
+		CXX_STANDARD_REQUIRED ON
+		CXX_EXTENSIONS OFF
+		COMPILE_WARNING_AS_ERROR ON
 	)
+	#target_include_directories(PREEMO_standalone PRIVATE 
+	#	${CMAKE_CURRENT_SOURCE_DIR}/include 
+	#	${CMAKE_CURRENT_SOURCE_DIR}/external
+	#)
 endif()
 
 # Set include directories
-target_include_directories(PREEMO PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(PREEMO PUBLIC 
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/external
+)
 
-target_link_libraries(PREEMO PUBLIC glfw webgpu glfw3webgpu)
+target_link_libraries(PREEMO PUBLIC 
+	glfw
+	webgpu
+	glfw3webgpu
+	flecs::flecs_static
+)
 
 target_copy_webgpu_binaries(PREEMO)
 

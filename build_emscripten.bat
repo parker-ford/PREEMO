@@ -18,7 +18,7 @@ call %EMSDK%\upstream\emscripten\tools\webidl_binder %IDL_FILE% %GLUE_FILE_PATH%
 
 REM Create idl wrapper file
 SET WRAPPER_FILENAME=%INTERMEDIATE_DIR%\webidl_wrapper.cpp
-echo #include "PreemoRoot.h" > %WRAPPER_FILENAME%
+echo #include "Preemo.h" > %WRAPPER_FILENAME%
 echo #include "%GLUE_FILENAME%.cpp" >> %WRAPPER_FILENAME%
 echo //--- >> %WRAPPER_FILENAME%
 

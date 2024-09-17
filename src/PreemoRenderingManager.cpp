@@ -152,7 +152,7 @@ namespace preemo {
 		WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
 		cmdBufferDescriptor.nextInChain = nullptr;
 		cmdBufferDescriptor.label = "Command buffer";
-		WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor)w
+		WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
 		wgpuCommandEncoderRelease(encoder);
 
 		//std::cout << "Submitting command..." << std::endl;

@@ -1,9 +1,11 @@
 #include "PreemoRoot.h"
 #include "PreemoRenderingManager.h"
+#include "PreemoSceneManager.h"
 
 namespace preemo {
 
 	extern RenderingManager* g_RenderingManager;
+	extern SceneManager* g_SceneManager;
 
 	bool Root::StartUp(void* window)
 	{
@@ -11,6 +13,12 @@ namespace preemo {
 			std::cout << "Failed to start up rendering manager" << std::endl;
 			return false;
 		}
+
+		if (!g_SceneManager->StartUp()) {
+			std::cout << "Failed to start up scene manager" << std::endl;
+			return false;
+		}
+
 
 		std::cout << __FILE__ << std::endl;
 		std::cout << __LINE__ << std::endl;
@@ -25,6 +33,7 @@ namespace preemo {
 	void Root::ShutDown()
 	{
 		g_RenderingManager->ShutDown();
+		g_SceneManager->ShutDown();
 	}
 
 	bool Root::IsRunning()
@@ -32,8 +41,10 @@ namespace preemo {
 		return g_RenderingManager->IsRunning();
 	}
 
-	void Root::Run()
+	void Root::Run(Scene* activeScene)
 	{
+		g_SceneManager->SetActiveScene(activeScene);
+
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 		auto callback = [](void*) {
 			if (g_RenderingManager) {
@@ -43,6 +54,7 @@ namespace preemo {
 		emscripten_set_main_loop_arg(callback, nullptr, 0, true);
 #else
 		while (IsRunning()) {
+			g_SceneManager->MainLoop();
 			g_RenderingManager->MainLoop();
 		}
 		ShutDown();

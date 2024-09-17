@@ -5,3 +5,15 @@ interface Root {
 	void Run();
 	void foo();
 };
+
+[Prefix = "preemo::"]
+interface Entity {
+	void Entity();
+	[Value] Entity AddComponent();
+};
+
+[Prefix = "preemo::"]
+interface Scene {
+	void Scene();
+	[Value] Entity CreateEntity();
+};
