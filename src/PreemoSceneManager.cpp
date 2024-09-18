@@ -1,4 +1,5 @@
 #include "PreemoSceneManager.h"
+#include "Components.h"
 
 
 namespace preemo {
@@ -30,7 +31,7 @@ namespace preemo {
 	}
 
 	SceneManager::SceneManager() {
-
+		m_ComponentRegistry.RegisterComponent<TransformComponent>("TransformComponent");
 	}
 	SceneManager::~SceneManager() {
 

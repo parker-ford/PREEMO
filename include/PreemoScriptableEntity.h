@@ -5,6 +5,7 @@ namespace preemo{
 	class ScriptableEntity{
 	public:
 		virtual ~ScriptableEntity() {}
+		//~ScriptableEntity() = default;
 
 		template<typename T>
 		T& GetComponent() {

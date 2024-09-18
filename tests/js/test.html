@@ -17,14 +17,19 @@
                 // console.log(Module);
                 // console.log(Module.Root());
                 const root = new Module.Root();
-                console.log(root);
                 root.StartUp(null);
-                // root.foo();
                 const scene = new Module.Scene();
                 const ent = scene.CreateEntity();
-                console.log(ent);
+                await sleep(1000);
+                // ent.AddComponent("TransformComponent")
+                if(ent.HasComponent("TransformComponent")){
+                    console.log("found transform");
+                }
+                else {
+                    console.log("did not find transform");
+                }
+                
 
-                // await sleep(1000);
                 // root.Run();
             } catch (e) {
                 console.error("Error:", e);

@@ -1,6 +1,9 @@
 #include "PreemoEntity.h"
+#include "PreemoSceneManager.h"
 
 namespace preemo {
+
+	extern SceneManager* g_SceneManager;
 
 	Entity::Entity(entt::entity handle, Scene* scene)
 		: m_EntityHandle(handle), m_Scene(scene)
@@ -8,7 +11,16 @@ namespace preemo {
 		std::cout << "entity created" << std::endl;
 	}
 
-	void Entity::AddComponent(std::string id)
+	void* Entity::AddComponent(std::string id) {
+		return g_SceneManager->m_ComponentRegistry.AddComponent(id, *this);
+	}
+
+	bool Entity::HasComponent(std::string id)
+	{
+		return g_SceneManager->m_ComponentRegistry.HasComponent(id, *this);
+	}
+
+	/*void Entity::AddComponent(std::string id)
 	{
 
 		if (!m_Scene) {
@@ -56,7 +68,7 @@ namespace preemo {
 		else {
 			std::cout << "Could not find Type: " << id << std::endl;
 		}
-	}
+	}*/
 
 
 

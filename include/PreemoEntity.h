@@ -26,10 +26,6 @@ namespace preemo {
 			//m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
-
-		/*void* AddComponent(const std::string& componentName) {
-			return g_ComponentRegistry.CreateComponent(componentName, *this);
-		}*/
 		
 		template<typename T>
 		bool HasComponent() {
@@ -42,7 +38,8 @@ namespace preemo {
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 	}
 
-		void AddComponent(std::string id);
+		void* AddComponent(std::string id);
+		bool HasComponent(std::string id);
 
 #else
 		void* AddComponent(int id);

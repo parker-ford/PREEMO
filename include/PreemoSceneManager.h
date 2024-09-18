@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include "PreemoScene.h"
+#include "PreemoComponentRegistry.h"
 
 namespace preemo {
 	//class Scene;
@@ -19,6 +20,8 @@ namespace preemo {
 		SceneManager();
 		~SceneManager();
 		Scene* m_ActiveScene;
+	public:
+		ComponentRegistry m_ComponentRegistry;
 	};
 
 }

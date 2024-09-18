@@ -8,7 +8,7 @@ project (
 	LANGUAGES CXX C
 )
 
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
@@ -33,14 +33,6 @@ else()
 	target_link_options(glfw INTERFACE -sUSE_GLFW=3)
 endif()
 
-# Add Flecs
-FetchContent_Declare(
-  flecs
-  GIT_REPOSITORY https://github.com/SanderMertens/flecs.git
-)
-
-FetchContent_MakeAvailable(flecs)
-
 # Add WebGPU
 add_subdirectory(external/webgpu)
 
@@ -60,11 +52,12 @@ set(PREEMO_SOURCES
     src/PreemoRenderingManagerInstance.cpp
     src/PreemoRenderPipeline.cpp
     src/PreemoScene.cpp
-    src/PreemoEntity.cpp
 	src/PreemoScriptableEntity.cpp
-    include/Components.h
+    src/PreemoEntity.cpp
     src/webgpu_impl.cpp
 	src/PreemoSceneManager.cpp
+	src/PreemoComponentRegistry.cpp
+    include/Components.h
 )
 if(EMSCRIPTEN)
 	add_executable(PREEMO 
@@ -84,7 +77,6 @@ else()
 	target_link_libraries(PREEMO_standalone 
 		PREEMO
 		glfw
-		flecs::flecs_static # TESTING
 	)
 	set_target_properties(PREEMO_standalone PROPERTIES
 		CXX_STANDARD 17
@@ -108,7 +100,6 @@ target_link_libraries(PREEMO PUBLIC
 	glfw
 	webgpu
 	glfw3webgpu
-	flecs::flecs_static
 )
 
 target_copy_webgpu_binaries(PREEMO)
@@ -147,6 +138,10 @@ if (EMSCRIPTEN)
     # set_target_properties(PREEMO PROPERTIES OUTPUT_NAME "preemo")
 endif()
 
+if(EMSCRIPTEN)
+  target_compile_options(PREEMO PRIVATE -Wno-delete-incomplete)
+endif()
+
 if(NOT EMSCRIPTEN)
 	# Enable testing
 	enable_testing()
@@ -155,4 +150,9 @@ if(NOT EMSCRIPTEN)
 	add_subdirectory(tests)
 endif()
 
-
+if(EMSCRIPTEN)
+     message("Emscripten CXX flags: ${CMAKE_CXX_FLAGS}")
+   else()
+     message("WebGPU CXX flags: ${CMAKE_CXX_FLAGS}")
+   endif()
+   

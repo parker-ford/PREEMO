@@ -2,14 +2,16 @@
 interface Root {
 	void Root();
 	boolean StartUp(VoidPtr windowPtr);
-	void Run();
+	void Run(Scene scene);
 	void foo();
 };
 
 [Prefix = "preemo::"]
 interface Entity {
 	void Entity();
-	[Value] Entity AddComponent();
+	//[Value] Entity AddComponent(DOMString);
+	any AddComponent(DOMString id);
+	boolean HasComponent(DOMString id);
 };
 
 [Prefix = "preemo::"]
