@@ -21,6 +21,9 @@ namespace preemo {
 		bool IsRunning();
 		void Run(Scene* scene);
 		void foo();
+		bool hasCompletedStartUp();
+	private:
+		bool startUpComplete = false;
 	};
 
 }

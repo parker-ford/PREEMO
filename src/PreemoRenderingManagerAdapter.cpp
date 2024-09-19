@@ -32,8 +32,7 @@ namespace preemo {
 
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 		while (!userData.requestEnded) {
-			std::cout << "waiting.." << std::endl;
-			emscripten_sleep(1);
+			emscripten_sleep(100);
 		}
 #endif
 

@@ -17,8 +17,6 @@ namespace preemo {
 		Entity(entt::entity handle, Scene* scene);
 		//Entity(const Entity& other) = default;
 
-#ifndef WGPU_BACKEND_EMSCRIPTEN
-
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
@@ -36,20 +34,14 @@ namespace preemo {
 		T& GetComponent()
 		{
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
-	}
+		}
 
-		void* AddComponent(std::string id);
-		bool HasComponent(std::string id);
+		// This is here to get around not being able to call templated function in javascipt
+#ifdef WEBGPU_BACKEND_EMSCRIPTEN
+		TransformComponent& AddComponentTransform();
+		bool HasComponentTransform();
+#endif // WEBGPU_BACKEND_EMSCRIPTEN
 
-#else
-		void* AddComponent(int id);
-#endif
-		/*
-		
-		AddComponent(
-		
-		
-		*/
 
 	private:
 		entt::entity m_EntityHandle{ entt::null };

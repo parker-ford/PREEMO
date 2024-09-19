@@ -7,7 +7,19 @@
     <h1>Test</h1>
     <p>This is a test page.</p>
     <canvas id="canvas"></canvas>
-    <script src="../../out/build/release-emscripten/PREEMO.js"></script>
+    <script type="module">
+        import * as PREEMO from './package/src/index.js';
+
+        await PREEMO.initialize();
+
+        const scene = new PREEMO.Scene();
+        const ent = scene.CreateEntity();
+        ent.AddComponent(PREEMO.Components.TransformComponent);
+        console.log(ent.HasComponent(PREEMO.Components.TransformComponent));
+
+
+    </script>
+    <!-- <script src="../../out/build/release-emscripten/PREEMO.js"></script>
     <script>
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
@@ -19,15 +31,24 @@
                 const root = new Module.Root();
                 root.StartUp(null);
                 const scene = new Module.Scene();
+                // const scene2 = console.log(Module.castObject(scene, Module.Scene))
                 const ent = scene.CreateEntity();
                 await sleep(1000);
-                // ent.AddComponent("TransformComponent")
+                // const comp = Module.wrapPointer(ent.AddComponent("TransformComponent"), Module.TransformComponent);
+                const obj = ent.AddComponent("TransformComponent");
+                console.log(obj);
+                const comp = Module.castObject(obj, Module.TransformComponent)
+                console.log(comp);
+                // const comp = ent.AddComponent("TransformComponent")
                 if(ent.HasComponent("TransformComponent")){
                     console.log("found transform");
                 }
                 else {
                     console.log("did not find transform");
                 }
+                console.log(Module)
+                console.log(comp.getTestValue());
+                
                 
 
                 // root.Run();
@@ -35,7 +56,7 @@
                 console.error("Error:", e);
             }
         });
-    </script>
+    </script> -->
 </body>
 
 </html>

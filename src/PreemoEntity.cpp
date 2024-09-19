@@ -11,14 +11,18 @@ namespace preemo {
 		std::cout << "entity created" << std::endl;
 	}
 
-	void* Entity::AddComponent(std::string id) {
-		return g_SceneManager->m_ComponentRegistry.AddComponent(id, *this);
-	}
-
-	bool Entity::HasComponent(std::string id)
+#if WEBGPU_BACKEND_EMSCRIPTEN
+	TransformComponent& Entity::AddComponentTransform()
 	{
-		return g_SceneManager->m_ComponentRegistry.HasComponent(id, *this);
+		return this->AddComponent<TransformComponent>();
+}
+	bool Entity::HasComponentTransform()
+	{
+		return this->HasComponent<TransformComponent>();
 	}
+#endif // WGPU_BACKEND_EMSCRIPTEN
+
+
 
 	/*void Entity::AddComponent(std::string id)
 	{
@@ -69,15 +73,4 @@ namespace preemo {
 			std::cout << "Could not find Type: " << id << std::endl;
 		}
 	}*/
-
-
-
-#if WGPU_BACKEND_EMSCRIPTEN
-	void* Entity::AddComponent(int component_id) {
-		if (component_id == 1) {
-			m_Scene->m_Registry.emplace<TransformComponent>(m_EntityHandle);
-		}
-	}
-#endif // WGPU_BACKEND_EMSCRIPTEN
-
 }

@@ -22,14 +22,27 @@ int main() {
 
     preemo::Scene scene;
     preemo::Entity ent = scene.CreateEntity();
-    //ent.AddComponent<preemo::TransformComponent>();
-    ent.AddComponent("TransformComponent");
+
+
+
+    auto component = ent.AddComponent<preemo::TransformComponent>();
+    //auto component = ent.AddComponent("Transformcomponent");
+    std::cout << component.testValue << std::endl;
+
+
+    /*ent.AddComponent("TransformComponent");
     if (ent.HasComponent("TransformComponent")) {
         std::cout << "found transform " << std::endl;
     }
     else {
         std::cout << "Did not find transform" << std::endl;
-    }
+    }*/
+
+
+
+
+
+    ///---
 
     class Controller : public preemo::ScriptableEntity {
     public:

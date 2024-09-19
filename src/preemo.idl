@@ -3,15 +3,16 @@ interface Root {
 	void Root();
 	boolean StartUp(VoidPtr windowPtr);
 	void Run(Scene scene);
-	void foo();
+	boolean hasCompletedStartUp();
 };
 
 [Prefix = "preemo::"]
 interface Entity {
 	void Entity();
-	//[Value] Entity AddComponent(DOMString);
-	any AddComponent(DOMString id);
-	boolean HasComponent(DOMString id);
+	//any AddComponent(DOMString id);
+	//boolean HasComponent(DOMString id);
+	[Value] TransformComponent AddComponentTransform();
+	boolean HasComponentTransform();
 };
 
 [Prefix = "preemo::"]
@@ -19,3 +20,11 @@ interface Scene {
 	void Scene();
 	[Value] Entity CreateEntity();
 };
+
+[Prefix = "preemo::"]
+interface TransformComponent {
+	//long testValue;
+	long getTestValue();
+	void TransformComponent();
+};
+

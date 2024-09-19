@@ -19,14 +19,11 @@ namespace preemo {
 			return false;
 		}
 
-
-		std::cout << __FILE__ << std::endl;
-		std::cout << __LINE__ << std::endl;
-
 		//PREEMO_TODO: Remove this
 		g_RenderingManager->TestBuffers();
 		g_RenderingManager->TestPipeline();
 
+		startUpComplete = true;
 		return true;
 	}
 
@@ -61,6 +58,12 @@ namespace preemo {
 #endif
 	}
 
+	//PREEMO_TODO: move to emscripten only
+	bool Root::hasCompletedStartUp()
+	{
+		return startUpComplete;
+	}
+
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 	EM_ASYNC_JS(int, do_fetch, (), {
 
@@ -75,6 +78,7 @@ namespace preemo {
 		do_fetch();
 		std::cout << "foo after" << std::endl;
 	}
+
 #endif
 
 }

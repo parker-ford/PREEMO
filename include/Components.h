@@ -5,8 +5,9 @@
 
 namespace preemo {
 	struct TransformComponent {
-		int t;
+		int testValue = 1;
 		TransformComponent() = default;
+		int getTestValue() { return testValue; }
 	};
 
 	class ScriptableEntity;
