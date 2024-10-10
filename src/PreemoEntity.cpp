@@ -20,6 +20,10 @@ namespace preemo {
 	{
 		return this->HasComponent<TransformComponent>();
 	}
+	NativeScriptComponent& Entity::AddComponentNativeScript()
+	{
+		return this->AddComponent<NativeScriptComponent>();
+	}
 #endif // WGPU_BACKEND_EMSCRIPTEN
 
 

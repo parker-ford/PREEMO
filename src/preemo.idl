@@ -6,13 +6,25 @@ interface Root {
 	boolean hasCompletedStartUp();
 };
 
+
+[Prefix = "preemo::"]
+interface TransformComponent {
+
+};
+
+[Prefix = "preemo::"]
+interface NativeScriptComponent {
+	void Bind(ScriptableEntity script);
+};
+
 [Prefix = "preemo::"]
 interface Entity {
 	void Entity();
-	//any AddComponent(DOMString id);
-	//boolean HasComponent(DOMString id);
-	[Value] TransformComponent AddComponentTransform();
+	//Transform Component
+	[Ref] TransformComponent AddComponentTransform(); //PREEMO_TODO: Determine reference vs. value
 	boolean HasComponentTransform();
+	//Native Script Component
+	[Ref] NativeScriptComponent AddComponentNativeScript();
 };
 
 [Prefix = "preemo::"]
@@ -22,9 +34,19 @@ interface Scene {
 };
 
 [Prefix = "preemo::"]
-interface TransformComponent {
-	//long testValue;
-	long getTestValue();
-	void TransformComponent();
+interface ScriptableEntity {
+	void OnCreate();
+	void OnDestroy();
+	void OnUpdate();
 };
+
+[JSImplementation = "ScriptableEntity"]
+interface ScriptableEntityJS {
+	void ScriptableEntityJS();
+	void OnCreate();
+	void OnDestroy();
+	void OnUpdate();
+};
+
+
 

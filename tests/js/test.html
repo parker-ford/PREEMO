@@ -11,52 +11,25 @@
         import * as PREEMO from './package/src/index.js';
 
         await PREEMO.initialize();
-
         const scene = new PREEMO.Scene();
+        console.log(scene);
         const ent = scene.CreateEntity();
         ent.AddComponent(PREEMO.Components.TransformComponent);
+
+
         console.log(ent.HasComponent(PREEMO.Components.TransformComponent));
 
+        const script = ent.AddComponent(PREEMO.Components.NativeScriptComponent);
+        // console.log(script);
+
+        const testEnt = PREEMO.testScript();
+        console.log(testEnt);
+        script.Bind(testEnt);
+
+        PREEMO.Run(scene);
 
     </script>
-    <!-- <script src="../../out/build/release-emscripten/PREEMO.js"></script>
-    <script>
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-        createModule().then(async function(Module) {
-            try {
-                // console.log(Module);
-                // console.log(Module.Root());
-                const root = new Module.Root();
-                root.StartUp(null);
-                const scene = new Module.Scene();
-                // const scene2 = console.log(Module.castObject(scene, Module.Scene))
-                const ent = scene.CreateEntity();
-                await sleep(1000);
-                // const comp = Module.wrapPointer(ent.AddComponent("TransformComponent"), Module.TransformComponent);
-                const obj = ent.AddComponent("TransformComponent");
-                console.log(obj);
-                const comp = Module.castObject(obj, Module.TransformComponent)
-                console.log(comp);
-                // const comp = ent.AddComponent("TransformComponent")
-                if(ent.HasComponent("TransformComponent")){
-                    console.log("found transform");
-                }
-                else {
-                    console.log("did not find transform");
-                }
-                console.log(Module)
-                console.log(comp.getTestValue());
-                
-                
-
-                // root.Run();
-            } catch (e) {
-                console.error("Error:", e);
-            }
-        });
-    </script> -->
+    
 </body>
 
 </html>

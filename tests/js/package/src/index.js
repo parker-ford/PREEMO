@@ -1,12 +1,13 @@
 import "../../../../out/build/release-emscripten/PREEMO.js";
 
+let preemo;
+let root;
+
 //Component List
 export const Components = Object.freeze({
   TransformComponent: Symbol("TransformComponent"),
+  NativeScriptComponent: Symbol("NativeScriptComponent"),
 });
-
-let preemo;
-let root;
 
 export async function initialize() {
   preemo = await loadPreemo();
@@ -92,6 +93,10 @@ export class Scene {
     const entHandle = this.#handle.CreateEntity();
     return new Entity(entHandle);
   }
+
+  GetHandle() {
+    return this.#handle;
+  }
 }
 
 export class Entity {
@@ -103,8 +108,14 @@ export class Entity {
   AddComponent(type) {
     switch (type) {
       case Components.TransformComponent:
+        console.log("index.js: adding new transform component");
+        // return new TransformComponent(this.#handle.AddComponentTransform());
         this.#handle.AddComponentTransform();
         break;
+      case Components.NativeScriptComponent:
+        return new NativeScriptComponent(
+          this.#handle.AddComponentNativeScript()
+        );
       default:
         console.log("default case");
     }
@@ -118,4 +129,58 @@ export class Entity {
         console.log("default case");
     }
   }
+}
+
+export class TransformComponent {
+  #handle;
+  constructor(handle) {
+    this.#handle = handle;
+  }
+}
+
+export class NativeScriptComponent {
+  #handle;
+  constructor(handle) {
+    this.#handle = handle;
+  }
+  Bind(ent) {
+    this.#handle.Bind(ent);
+  }
+}
+
+export function testScript() {
+  // class Entity extends preemo.ScriptableEntityJS {
+  //   OnCreate() {
+  //     console.log("Entity created");
+  //   }
+
+  //   OnUpdate() {
+  //     console.log("Entity updated");
+  //   }
+
+  //   OnDestroy() {
+  //     console.log("Entity destroyed");
+  //   }
+  // }
+
+  // const testEnt = new Entity();
+  // console.log(testEnt);
+  // return testEnt;
+  const testEnt = new preemo.ScriptableEntityJS();
+  console.log(testEnt);
+  testEnt.OnCreate = function () {
+    console.log("On Create");
+  };
+  testEnt.OnUpdate = function () {
+    console.log("On Update :)");
+  };
+  testEnt.OnDestroy = function () {
+    console.log("On Destroy");
+  };
+
+  return testEnt;
+}
+
+export function Run(scene) {
+  root.Run(scene.GetHandle());
 }

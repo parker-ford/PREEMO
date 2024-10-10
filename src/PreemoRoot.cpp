@@ -45,6 +45,7 @@ namespace preemo {
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
 		auto callback = [](void*) {
 			if (g_RenderingManager) {
+				g_SceneManager->MainLoop();
 				g_RenderingManager->MainLoop();
 			}
 		};

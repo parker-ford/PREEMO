@@ -31,7 +31,7 @@ namespace preemo {
 	}
 
 	SceneManager::SceneManager() {
-		m_ComponentRegistry.RegisterComponent<TransformComponent>("TransformComponent");
+		//m_ComponentRegistry.RegisterComponent<TransformComponent>("TransformComponent");
 	}
 	SceneManager::~SceneManager() {
 

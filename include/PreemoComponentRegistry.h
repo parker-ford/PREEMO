@@ -8,7 +8,7 @@
 
 namespace preemo {
 
-	class Entity;
+	/*class Entity;
 
 	struct ComponentRegistryItem {
 		std::function<void* (Entity&)> addComponent;
@@ -53,5 +53,5 @@ namespace preemo {
 
 	private:
 		std::unordered_map<std::string, ComponentRegistryItem> m_ComponentFactories;
-	};
+	};*/
 }

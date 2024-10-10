@@ -22,12 +22,14 @@ int main() {
 
     preemo::Scene scene;
     preemo::Entity ent = scene.CreateEntity();
+    scene.CreateEntity();
+    scene.CreateEntity();
+    scene.CreateEntity();
 
 
 
-    auto component = ent.AddComponent<preemo::TransformComponent>();
+    //auto component = ent.AddComponent<preemo::TransformComponent>();
     //auto component = ent.AddComponent("Transformcomponent");
-    std::cout << component.testValue << std::endl;
 
 
     /*ent.AddComponent("TransformComponent");

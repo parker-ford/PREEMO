@@ -19,6 +19,7 @@ namespace preemo {
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
+			std::cout << "adding component " << std::endl;
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			//PREEMO_TODO: Look into what this does
 			//m_Scene->OnComponentAdded<T>(*this, component);
@@ -38,8 +39,14 @@ namespace preemo {
 
 		// This is here to get around not being able to call templated function in javascipt
 #ifdef WEBGPU_BACKEND_EMSCRIPTEN
+		//Transform Component
 		TransformComponent& AddComponentTransform();
 		bool HasComponentTransform();
+
+		//NativeScriptComponent
+		NativeScriptComponent& AddComponentNativeScript();
+		
+
 #endif // WEBGPU_BACKEND_EMSCRIPTEN
 
 

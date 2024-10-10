@@ -15,10 +15,10 @@ namespace preemo{
 		bool HasComponent() {
 			return m_Entity.HasComponent<T>();
 		}
-	protected:
+	//protected: //PREEMO_TODO: protected was removed for emscripten testing
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate() { std::cout << "default update" << std::endl; }
 	private:
 		Entity m_Entity;
 		friend class Scene;

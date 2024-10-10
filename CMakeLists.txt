@@ -57,7 +57,8 @@ set(PREEMO_SOURCES
     src/webgpu_impl.cpp
 	src/PreemoSceneManager.cpp
 	src/PreemoComponentRegistry.cpp
-    include/Components.h
+	src/Components.cpp
+    # include/Components.h
 )
 if(EMSCRIPTEN)
 	add_executable(PREEMO 
@@ -133,13 +134,19 @@ if (EMSCRIPTEN)
         -sMODULARIZE=1
         -sEXPORT_NAME="createModule"
         "--post-js=${CMAKE_BINARY_DIR}/intermediate/glue.js"
+		-sNO_DISABLE_EXCEPTION_CATCHING
     )
     
     # set_target_properties(PREEMO PROPERTIES OUTPUT_NAME "preemo")
 endif()
 
 if(EMSCRIPTEN)
-  target_compile_options(PREEMO PRIVATE -Wno-delete-incomplete)
+  target_compile_options(PREEMO PRIVATE 
+  -Wno-delete-incomplete
+  -Wno-dollar-in-identifier-extension
+  -Wno-unused-parameter
+  -Wno-unused-variable
+  )
 endif()
 
 if(NOT EMSCRIPTEN)

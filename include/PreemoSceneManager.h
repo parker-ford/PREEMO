@@ -21,7 +21,7 @@ namespace preemo {
 		~SceneManager();
 		Scene* m_ActiveScene;
 	public:
-		ComponentRegistry m_ComponentRegistry;
+		//ComponentRegistry m_ComponentRegistry;
 	};
 
 }
