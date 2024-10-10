@@ -18,7 +18,7 @@ namespace preemo{
 	//protected: //PREEMO_TODO: protected was removed for emscripten testing
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
-		virtual void OnUpdate() { std::cout << "default update" << std::endl; }
+		virtual void OnUpdate() {}
 	private:
 		Entity m_Entity;
 		friend class Scene;

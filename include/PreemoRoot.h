@@ -1,5 +1,4 @@
-#ifndef __ROOT__
-#define __ROOT__
+#pragma once
 
 #include <iostream>
 #include <cassert>
@@ -10,7 +9,6 @@
 #include <emscripten/val.h>
 #include <emscripten/html5.h>
 #endif // __EMSCRIPTEN__
-
 
 namespace preemo {
 	class Scene;
@@ -27,4 +25,3 @@ namespace preemo {
 	};
 
 }
-#endif // !__ROOT__

@@ -56,9 +56,7 @@ set(PREEMO_SOURCES
     src/PreemoEntity.cpp
     src/webgpu_impl.cpp
 	src/PreemoSceneManager.cpp
-	src/PreemoComponentRegistry.cpp
-	src/Components.cpp
-    # include/Components.h
+	src/PreemoComponents.cpp
 )
 if(EMSCRIPTEN)
 	add_executable(PREEMO 

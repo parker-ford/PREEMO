@@ -1,6 +1,6 @@
 #include "PreemoRoot.h"
 #include "PreemoScene.h"
 #include "PreemoEntity.h"
-#include "Components.h"
+#include "PreemoComponents.h"
 #include "PreemoEntity.h"
 #include "PreemoScriptableEntity.h"	

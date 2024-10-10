@@ -1,21 +1,19 @@
 #pragma once
 #include <entt/entt.hpp>
 #include "PreemoScene.h"
-#include "Components.h"
+#include "PreemoComponents.h"
 
 //TEMP
 #include <iostream>
 
-//Taken from: https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Scene/Entity.h
-
-
+//Inspired by: https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Scene/Entity.h
 
 namespace preemo {
 	class Entity {
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
-		//Entity(const Entity& other) = default;
+		//Entity(const Entity& other) = default; // Causes emscripten to not compile
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
@@ -25,7 +23,7 @@ namespace preemo {
 			//m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
-		
+
 		template<typename T>
 		bool HasComponent() {
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
@@ -44,11 +42,8 @@ namespace preemo {
 		bool HasComponentTransform();
 
 		//NativeScriptComponent
-		NativeScriptComponent& AddComponentNativeScript();
-		
-
+		ScriptComponent& AddComponentScript();
 #endif // WEBGPU_BACKEND_EMSCRIPTEN
-
 
 	private:
 		entt::entity m_EntityHandle{ entt::null };

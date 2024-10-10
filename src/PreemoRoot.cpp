@@ -58,28 +58,13 @@ namespace preemo {
 		ShutDown();
 #endif
 	}
-
-	//PREEMO_TODO: move to emscripten only
+	
+#ifdef WEBGPU_BACKEND_EMSCRIPTEN
+	
 	bool Root::hasCompletedStartUp()
 	{
 		return startUpComplete;
 	}
-
-#ifdef WEBGPU_BACKEND_EMSCRIPTEN
-	EM_ASYNC_JS(int, do_fetch, (), {
-
-	fetch('https://jsonplaceholder.typicode.com/todos/1')
-		.then(response => response.json())
-		.then(data => console.log(data))
-		.catch (error => console.error('Error:', error));
-
-		});
-	void Root::foo() {
-		std::cout << "foo before" << std::endl;
-		do_fetch();
-		std::cout << "foo after" << std::endl;
-	}
-
 #endif
 
 }

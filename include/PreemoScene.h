@@ -8,7 +8,7 @@ namespace preemo {
 	class Scene {
 		friend class Entity;
 	public:
-		Scene();
+		Scene() = default;
 		Entity CreateEntity();
 		void UpdateScriptableEntities();
 

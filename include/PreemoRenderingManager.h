@@ -1,5 +1,4 @@
-#ifndef __RENDERING_MANAGER__
-#define __RENDERING_MANAGER__
+#pragma once
 
 #include <webgpu/webgpu.hpp>
 #include <GLFW/glfw3.h>
@@ -111,5 +110,3 @@ namespace preemo {
 		wgpu::Buffer indexBuffer;
 	};
 }
-
-#endif // __RENDERING_MANAGER__

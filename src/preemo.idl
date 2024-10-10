@@ -6,25 +6,26 @@ interface Root {
 	boolean hasCompletedStartUp();
 };
 
-
 [Prefix = "preemo::"]
 interface TransformComponent {
 
 };
 
 [Prefix = "preemo::"]
-interface NativeScriptComponent {
+interface ScriptComponent {
 	void Bind(ScriptableEntity script);
 };
 
 [Prefix = "preemo::"]
 interface Entity {
 	void Entity();
+
 	//Transform Component
-	[Ref] TransformComponent AddComponentTransform(); //PREEMO_TODO: Determine reference vs. value
+	[Ref] TransformComponent AddComponentTransform();
 	boolean HasComponentTransform();
-	//Native Script Component
-	[Ref] NativeScriptComponent AddComponentNativeScript();
+
+	//Script Component
+	[Ref] ScriptComponent AddComponentScript();
 };
 
 [Prefix = "preemo::"]

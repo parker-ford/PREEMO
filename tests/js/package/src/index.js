@@ -6,7 +6,7 @@ let root;
 //Component List
 export const Components = Object.freeze({
   TransformComponent: Symbol("TransformComponent"),
-  NativeScriptComponent: Symbol("NativeScriptComponent"),
+  ScriptComponent: Symbol("ScriptComponent"),
 });
 
 export async function initialize() {
@@ -112,10 +112,8 @@ export class Entity {
         // return new TransformComponent(this.#handle.AddComponentTransform());
         this.#handle.AddComponentTransform();
         break;
-      case Components.NativeScriptComponent:
-        return new NativeScriptComponent(
-          this.#handle.AddComponentNativeScript()
-        );
+      case Components.ScriptComponent:
+        return new ScriptComponent(this.#handle.AddComponentScript());
       default:
         console.log("default case");
     }
@@ -138,7 +136,7 @@ export class TransformComponent {
   }
 }
 
-export class NativeScriptComponent {
+export class ScriptComponent {
   #handle;
   constructor(handle) {
     this.#handle = handle;
@@ -149,23 +147,6 @@ export class NativeScriptComponent {
 }
 
 export function testScript() {
-  // class Entity extends preemo.ScriptableEntityJS {
-  //   OnCreate() {
-  //     console.log("Entity created");
-  //   }
-
-  //   OnUpdate() {
-  //     console.log("Entity updated");
-  //   }
-
-  //   OnDestroy() {
-  //     console.log("Entity destroyed");
-  //   }
-  // }
-
-  // const testEnt = new Entity();
-  // console.log(testEnt);
-  // return testEnt;
   const testEnt = new preemo.ScriptableEntityJS();
   console.log(testEnt);
   testEnt.OnCreate = function () {
