@@ -12,19 +12,30 @@
 
         await PREEMO.initialize();
         const scene = new PREEMO.Scene();
-        console.log(scene);
+
+        class MyScript extends PREEMO.Script{
+            OnUpdate() {
+                console.log(super.HasComponent(PREEMO.Components.TransformComponent))
+                // super.testFunction();
+            }
+
+            OnCreate() {
+                console.log("ON CREATE")
+            }
+
+
+        }
+
         const ent = scene.CreateEntity();
         ent.AddComponent(PREEMO.Components.TransformComponent);
+        const scriptComponent = ent.AddComponent(PREEMO.Components.ScriptComponent).Bind(MyScript);
+
+    
+        PREEMO.testScript();
 
 
-        console.log(ent.HasComponent(PREEMO.Components.TransformComponent));
-
-        const script = ent.AddComponent(PREEMO.Components.NativeScriptComponent);
-        // console.log(script);
-
-        const testEnt = PREEMO.testScript();
-        console.log(testEnt);
-        script.Bind(testEnt);
+        // const testEnt = PREEMO.testScript();
+        // scriptComponent.Bind(testEnt);
 
         PREEMO.Run(scene);
 

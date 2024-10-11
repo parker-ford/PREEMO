@@ -108,12 +108,9 @@ export class Entity {
   AddComponent(type) {
     switch (type) {
       case Components.TransformComponent:
-        console.log("index.js: adding new transform component");
-        // return new TransformComponent(this.#handle.AddComponentTransform());
-        this.#handle.AddComponentTransform();
-        break;
+        return new TransformComponent(this.#handle.AddComponentTransform());
       case Components.ScriptComponent:
-        return new ScriptComponent(this.#handle.AddComponentScript());
+        return new ScriptComponent(this.#handle.AddComponentScript(), this);
       default:
         console.log("default case");
     }
@@ -138,28 +135,75 @@ export class TransformComponent {
 
 export class ScriptComponent {
   #handle;
-  constructor(handle) {
+  #entity;
+
+  constructor(handle, entity) {
     this.#handle = handle;
+    this.#entity = entity;
   }
-  Bind(ent) {
-    this.#handle.Bind(ent);
+  Bind(script) {
+    const scriptInstance = new preemo.ScriptableEntityJS();
+    scriptInstance.entity = this.#entity;
+    scriptInstance.testNum = 1;
+    // console.log(this.#entity.HasComponent(Components.TransformComponent));
+
+    //On Create
+    if (typeof script.prototype["OnCreate"] === "function") {
+      scriptInstance.OnCreate = script.prototype["OnCreate"];
+    } else {
+      scriptInstance.OnCreate = function () {};
+    }
+
+    //On Update
+    if (typeof script.prototype["OnUpdate"] === "function") {
+      scriptInstance.OnUpdate = script.prototype["OnUpdate"];
+    } else {
+      scriptInstance.OnUpdate = function () {};
+    }
+
+    //On Destroy
+    if (typeof script.prototype["OnDestroy"] === "function") {
+      scriptInstance.OnDestroy = script.prototype["OnDestroy"];
+    } else {
+      scriptInstance.OnDestroy = function () {};
+    }
+
+    this.#handle.Bind(scriptInstance);
   }
 }
 
-export function testScript() {
-  const testEnt = new preemo.ScriptableEntityJS();
-  console.log(testEnt);
-  testEnt.OnCreate = function () {
-    console.log("On Create");
-  };
-  testEnt.OnUpdate = function () {
-    console.log("On Update :)");
-  };
-  testEnt.OnDestroy = function () {
-    console.log("On Destroy");
-  };
+export class Script {
+  entity;
+  HasComponent(type) {
+    // this.entity.HasComponent(type);
+    // console.log(this.testNum);
+    // return this.testNum;
+    return this.entity.HasComponent(type);
+  }
+  // testFunction() {
+  //   // this.test = 2;
+  //   console.log("yo " + this.test);
+  // }
+}
 
-  return testEnt;
+// export class Script extends preemo.ScriptableEntityJS {}
+
+export function testScript() {
+  console.log(preemo.ScriptableEntityJS);
+
+  // const testEnt = new preemo.ScriptableEntityJS();
+  // testEnt.name = name;
+  // testEnt.OnCreate = function () {
+  //   console.log("On Create");
+  // };
+  // testEnt.OnUpdate = function () {
+  //   console.log("On Update ");
+  // };
+  // testEnt.OnDestroy = function () {
+  //   console.log("On Destroy");
+  // };
+
+  // return testEnt;
 }
 
 export function Run(scene) {

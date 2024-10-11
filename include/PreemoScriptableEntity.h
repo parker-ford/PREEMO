@@ -15,11 +15,18 @@ namespace preemo{
 		bool HasComponent() {
 			return m_Entity.HasComponent<T>();
 		}
+
+		int test = 1;
+
+		Entity* GetEntity() {
+			return &m_Entity;
+		}
+
 	//protected: //PREEMO_TODO: protected was removed for emscripten testing
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
 		virtual void OnUpdate() {}
-	private:
+	//private: //PREEMO_TODO: removed private for emscripten testing
 		Entity m_Entity;
 		friend class Scene;
 	};

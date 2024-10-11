@@ -1,6 +1,7 @@
 //#include "PreemoRoot.h"
 #include "Preemo.h"
 #include <iostream>
+#include <string>
 #include <GLFW/glfw3.h>
 
 
@@ -27,37 +28,17 @@ int main() {
     scene.CreateEntity();
 
 
-
-    //auto component = ent.AddComponent<preemo::TransformComponent>();
-    //auto component = ent.AddComponent("Transformcomponent");
-
-
-    /*ent.AddComponent("TransformComponent");
-    if (ent.HasComponent("TransformComponent")) {
-        std::cout << "found transform " << std::endl;
-    }
-    else {
-        std::cout << "Did not find transform" << std::endl;
-    }*/
-
-
-
-
-
-    ///---
-
     class Controller : public preemo::ScriptableEntity {
     public:
         void OnCreate() {
             std::cout << "CONTROLLER CREATED!" << std::endl;
         }
         void OnUpdate() {
-            std::cout << "UPDATE" << std::endl;
+            std::cout << "UPDATE " << std::endl;
             if (HasComponent<preemo::TransformComponent>()) {
                 std::cout << "HAS" << std::endl;
             }
         }
-        
     };
 
     class Controller2 : public preemo::ScriptableEntity {
@@ -67,7 +48,8 @@ int main() {
         }
     };
 
-    //ent.AddComponent<preemo::NativeScriptComponent>().Bind<Controller>();
+    ent.AddComponent<preemo::ScriptComponent>().Bind<Controller>();
+
     //ent.AddComponent<preemo::NativeScriptComponent>().Bind<Controller2>();
 
     root.Run(&scene);
