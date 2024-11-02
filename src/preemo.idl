@@ -2,5 +2,60 @@
 interface Root {
 	void Root();
 	boolean StartUp(VoidPtr windowPtr);
-	void Run();
+	void Run(Scene scene);
+	boolean hasCompletedStartUp();
 };
+
+[Prefix = "preemo::"]
+interface TransformComponent {
+
+};
+
+[Prefix = "preemo::"]
+interface ScriptComponent {
+	void Bind(ScriptableEntity script);
+};
+
+[Prefix = "preemo::"]
+interface Entity {
+	void Entity();
+
+	//Transform Component
+	[Ref] TransformComponent AddComponentTransform();
+	boolean HasComponentTransform();
+
+	//Script Component
+	[Ref] ScriptComponent AddComponentScript();
+};
+
+[Prefix = "preemo::"]
+interface Scene {
+	void Scene();
+	[Value] Entity CreateEntity();
+};
+
+[Prefix = "preemo::"]
+interface ScriptableEntity {
+	void OnCreate();
+	void OnDestroy();
+	void OnUpdate();
+
+	//Entity GetEntity();
+
+	attribute long test;
+};
+
+[JSImplementation = "ScriptableEntity"]
+interface ScriptableEntityJS {
+	void ScriptableEntityJS();
+	void OnCreate();
+	void OnDestroy();
+	void OnUpdate();
+
+	//Entity GetEntity();
+
+	attribute long test;
+};
+
+
+

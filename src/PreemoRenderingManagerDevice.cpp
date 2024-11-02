@@ -5,7 +5,7 @@ namespace preemo {
 
 	RenderingManager::Device::Device(Adapter adapter, wgpu::DeviceDescriptor const* descriptor)
 	{
-		wgpuDevice = RequestDeviceSynchronous(adapter.wgpuAdapter, descriptor);
+		wgpu_device = RequestDeviceSynchronous(adapter.wgpu_adapter, descriptor);
 
 		// A function that is invoked whenever there is an error in the use of the device
 		auto onDeviceError = [](WGPUErrorType type, char const* message, void* /* pUserData */) {
@@ -13,12 +13,12 @@ namespace preemo {
 			if (message) std::cout << " (" << message << ")";
 			std::cout << std::endl;
 			};
-		wgpuDeviceSetUncapturedErrorCallback(wgpuDevice, onDeviceError, nullptr /* pUserData */);
+		wgpuDeviceSetUncapturedErrorCallback(wgpu_device, onDeviceError, nullptr /* pUserData */);
 	}
 
 	wgpu::Device RenderingManager::Device::RequestDeviceSynchronous(wgpu::Adapter adapter, wgpu::DeviceDescriptor const* descriptor) {
 		struct UserData {
-			wgpu::Device device = nullptr;
+			wgpu::Device requestedDevice = nullptr;
 			bool requestEnded = false;
 		};
 		UserData userData;
@@ -26,7 +26,7 @@ namespace preemo {
 		auto onDeviceRequestEnded = [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message, void* pUserData) {
 			UserData& userData = *reinterpret_cast<UserData*>(pUserData);
 			if (status == WGPURequestDeviceStatus_Success) {
-				userData.device = device;
+				userData.requestedDevice = device;
 			}
 			else {
 				std::cout << "Could not get WebGPU device: " << message << std::endl;
@@ -49,19 +49,19 @@ namespace preemo {
 
 		assert(userData.requestEnded);
 
-		if (!userData.device) {
+		if (!userData.requestedDevice) {
 			std::cout << "Failed to request device" << std::endl;
 			return nullptr;
 		}
 
-		return userData.device;
+		return userData.requestedDevice;
 	}
 
 	void RenderingManager::Device::Inspect() {
 		std::vector<WGPUFeatureName> features;
-		size_t featureCount = wgpuDeviceEnumerateFeatures(wgpuDevice, nullptr);
+		size_t featureCount = wgpuDeviceEnumerateFeatures(wgpu_device, nullptr);
 		features.resize(featureCount);
-		wgpuDeviceEnumerateFeatures(wgpuDevice, features.data());
+		wgpuDeviceEnumerateFeatures(wgpu_device, features.data());
 
 		std::cout << "Device features:" << std::endl;
 		std::cout << std::hex;
@@ -76,7 +76,7 @@ namespace preemo {
 #ifdef WEBGPU_BACKEND_DAWN
 		bool success = wgpuDeviceGetLimits(wgpuDevice, &limits) == WGPUStatus_Success;
 #else
-		bool success = wgpuDeviceGetLimits(wgpuDevice, &limits);
+		bool success = wgpuDeviceGetLimits(wgpu_device, &limits);
 #endif
 
 		if (success) {

@@ -1,19 +1,33 @@
 #include "PreemoRenderingManager.h"
-//#include "PreemoRenderingManagerAdapter.h"
-//#include "PreemoRenderingManagerDevice.h"
 
 namespace preemo {
+
+	RenderingManager* g_RenderingManager = nullptr;
+
 	bool RenderingManager::StartUp(void* windowPtr)
+	{
+		assert(!g_RenderingManager);
+		g_RenderingManager = new RenderingManager(windowPtr);
+
+		return true;
+	}
+
+	void RenderingManager::ShutDown()
+	{
+		delete g_RenderingManager;
+	}
+
+	RenderingManager::RenderingManager(void* windowPtr)
 	{
 		// Initialize Instance
 		Instance instance = Instance();
 
 		// Initialize Surface
-		surface = Surface(instance.wgpuInstance, windowPtr);
+		m_surface = Surface(instance.wgpu_instance, windowPtr);
 
 		// Request Adapter
 		wgpu::RequestAdapterOptions adapterOpts = {};
-		Adapter adapter(instance.wgpuInstance, &adapterOpts);
+		Adapter adapter(instance.wgpu_instance, &adapterOpts);
 		//adapter.Inspect();
 
 		// Request Device
@@ -42,12 +56,14 @@ namespace preemo {
 			};
 #endif
 
-
-		device = Device(adapter, &deviceDesc);
+		wgpu::RequiredLimits requiredLimits = adapter.GetRequiredLimits();
+		deviceDesc.requiredLimits = &requiredLimits;
+		m_device = Device(adapter, &deviceDesc);
 		//device.Inspect();
 
 		// Initialize Queue
-		queue = wgpuDeviceGetQueue(device.wgpuDevice);
+		// PREEMO_TODO: Look into implicit casting to avoid having to write code like this. Example: https://www.youtube.com/watch?v=D4hz0wEB978&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=78 @ 20:00
+		m_queue = wgpuDeviceGetQueue(m_device.wgpu_device);
 
 		// Configure Surface
 		wgpu::SurfaceConfiguration config = {};
@@ -55,35 +71,38 @@ namespace preemo {
 		config.width = 640;
 		config.height = 480;
 		config.usage = wgpu::TextureUsage::RenderAttachment;
-		wgpu::TextureFormat surfaceFormat = surface.wgpuSurface.getPreferredFormat(adapter.wgpuAdapter);
-		config.format = surfaceFormat;
+		config.format = m_surface.wgpu_surface.getPreferredFormat(adapter.wgpu_adapter);
 		config.viewFormatCount = 0;
 		config.viewFormats = nullptr;
-		config.device = device.wgpuDevice;
+		config.device = m_device.wgpu_device;
 		config.presentMode = wgpu::PresentMode::Fifo;
 		config.alphaMode = wgpu::CompositeAlphaMode::Auto;
-		surface.Configure(&config);
+		m_surface.Configure(&config);
 
 		//Release Adapter & Instance
-		adapter.wgpuAdapter.release();
-		instance.wgpuInstance.release();
-
-		return true;
+		adapter.wgpu_adapter.release();
+		instance.wgpu_instance.release();
 	}
 
-	void RenderingManager::ShutDown()
+	RenderingManager::~RenderingManager() {
+		//pipeline.Release();
+		//PREEMO_TODO: Make class level release/unconfigure methods
+		m_surface.wgpu_surface.unconfigure();
+		m_queue.release();
+		m_surface.wgpu_surface.release();
+		m_device.wgpu_device.release();
+	}
+
+	RenderingManager& RenderingManager::GetInstance()
 	{
-		surface.wgpuSurface.unconfigure();
-		queue.release();
-		surface.wgpuSurface.release();
-		device.wgpuDevice.release();
+		return *g_RenderingManager;
 	}
 
 	void RenderingManager::MainLoop()
 	{
 		glfwPollEvents();
 
-		WGPUTextureView targetView = surface.GetNextSurfaceTextureView();
+		WGPUTextureView targetView = m_surface.GetNextSurfaceTextureView();
 		if (!targetView) {
 			std::cout << "target View null" << std::endl;
 			return;
@@ -93,18 +112,17 @@ namespace preemo {
 		WGPUCommandEncoderDescriptor encoderDesc = {};
 		encoderDesc.nextInChain = nullptr;
 		encoderDesc.label = "My command encoder";
-		WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device.wgpuDevice, &encoderDesc);
+		WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(m_device.wgpu_device, &encoderDesc);
 
 		// Create the render pass that clears the screen with our color
 		WGPURenderPassDescriptor renderPassDesc = {};
-		renderPassDesc.nextInChain = nullptr;
 
 		// The attachment part of the render pass descriptor describes the target texture of the pass
 		WGPURenderPassColorAttachment renderPassColorAttachment = {};
 		renderPassColorAttachment.view = targetView;
 		renderPassColorAttachment.resolveTarget = nullptr;
-		renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
-		renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+		renderPassColorAttachment.loadOp = wgpu::LoadOp::Clear;
+		renderPassColorAttachment.storeOp = wgpu::StoreOp::Store;
 		renderPassColorAttachment.clearValue = WGPUColor{ 0.9, 0.1, 0.2, 1.0 };
 #ifndef WEBGPU_BACKEND_WGPU
 		renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
@@ -116,9 +134,19 @@ namespace preemo {
 		renderPassDesc.timestampWrites = nullptr;
 
 		// Create the render pass and end it immediately (we only clear the screen but do not draw anything)
-		WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
-		wgpuRenderPassEncoderEnd(renderPass);
-		wgpuRenderPassEncoderRelease(renderPass);
+		wgpu::RenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
+
+		renderPass.setPipeline(m_pipeline->getWGPURenderPipeline());
+
+		renderPass.setVertexBuffer(0, pointBuffer, 0, pointBuffer.getSize());
+
+		renderPass.setIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 0, indexBuffer.getSize());
+
+
+		renderPass.drawIndexed(indexCount, 1, 0, 0, 0);
+
+		renderPass.end();
+		renderPass.release();
 
 		// Finally encode and submit the render pass
 		WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
@@ -128,21 +156,21 @@ namespace preemo {
 		wgpuCommandEncoderRelease(encoder);
 
 		//std::cout << "Submitting command..." << std::endl;
-		wgpuQueueSubmit(queue, 1, &command);
+		wgpuQueueSubmit(m_queue, 1, &command);
 		wgpuCommandBufferRelease(command);
 		//std::cout << "Command submitted." << std::endl;
 
 		// At the end of the frame
 		wgpuTextureViewRelease(targetView);
 #ifndef __EMSCRIPTEN__
-		wgpuSurfacePresent(surface.wgpuSurface);
+		wgpuSurfacePresent(m_surface.wgpu_surface);
 #endif
 
 		// Also move here the tick/poll but NOT the emscripten sleep
 #if defined(WEBGPU_BACKEND_DAWN)
-		wgpuDeviceTick(device.wgpuDevice);
+		wgpuDeviceTick(mDevice.wgpuDevice);
 #elif defined(WEBGPU_BACKEND_WGPU)
-		wgpuDevicePoll(device.wgpuDevice, false, nullptr);
+		wgpuDevicePoll(m_device.wgpu_device, false, nullptr);
 #elif defined(WEBGPU_BACKEND_EMSCRIPTEN)
 		std::cout << "main loop" << std::endl;
 #endif
@@ -150,7 +178,137 @@ namespace preemo {
 
 	bool RenderingManager::IsRunning()
 	{
-		return !surface.ShouldClose();
+		return !m_surface.ShouldClose();
+	}
+
+	wgpu::Device RenderingManager::getWGPUDevice()
+	{
+		return m_device.wgpu_device;
+	}
+
+	RenderingManager::Surface RenderingManager::getSurface()
+	{
+		return m_surface;
+	}
+
+	RenderingManager::Device RenderingManager::getDevice()
+	{
+		return m_device;
+	}
+
+	void RenderingManager::TestPipeline()
+	{
+		m_pipeline = new RenderPipeline();
+	}
+
+	void RenderingManager::TestBuffers()
+	{
+		std::vector<float> pointData = {
+			// x,   y,     r,   g,   b
+			-0.5, -0.5,   1.0, 0.0, 0.0, // Point #0
+			+0.5, -0.5,   0.0, 1.0, 0.0, // Point #1
+			+0.5, +0.5,   0.0, 0.0, 1.0, // Point #2
+			-0.5, +0.5,   1.0, 1.0, 0.0  // Point #3
+		};
+
+		std::vector<uint16_t> indexData = {
+			0, 1, 2, // Triangle #0 connects points #0, #1 and #2
+			0, 2, 3  // Triangle #1 connects points #0, #2 and #3
+		};
+
+
+		indexCount = static_cast<uint32_t>(indexData.size());
+
+		wgpu::BufferDescriptor bufferDesc;
+		bufferDesc.size = pointData.size() * sizeof(float);
+		bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
+		bufferDesc.mappedAtCreation = false;
+		pointBuffer = m_device.wgpu_device.createBuffer(bufferDesc);
+
+		//write geometry data to the buffer
+		m_queue.writeBuffer(pointBuffer, 0, pointData.data(), bufferDesc.size);
+
+		bufferDesc.size = indexData.size() * sizeof(uint16_t);
+		bufferDesc.size = (bufferDesc.size + 3) & ~3; // round up to the next multiple of 4
+		bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Index;
+		indexBuffer = m_device.wgpu_device.createBuffer(bufferDesc);
+
+		m_queue.writeBuffer(indexBuffer, 0, indexData.data(), bufferDesc.size);
+	}
+
+	wgpu::ShaderModule loadShaderModule(const fs::path& path, wgpu::Device device) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			return nullptr;
+		}
+		file.seekg(0, std::ios::end);
+		size_t size = file.tellg();
+		std::string shaderSource(size, ' ');
+		file.seekg(0);
+		file.read(shaderSource.data(), size);
+
+		wgpu::ShaderModuleWGSLDescriptor shaderCodeDesc;
+		shaderCodeDesc.chain.next = nullptr;
+		shaderCodeDesc.chain.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+		shaderCodeDesc.code = shaderSource.c_str();
+		wgpu::ShaderModuleDescriptor shaderDesc;
+		shaderDesc.nextInChain = &shaderCodeDesc.chain;
+#ifdef WEBGPU_BACKEND_WGPU
+		shaderDesc.hintCount = 0;
+		shaderDesc.hints = nullptr;
+#endif
+
+		return device.createShaderModule(shaderDesc);
+	}
+
+	bool loadGeometry(const fs::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			return false;
+		}
+
+		pointData.clear();
+		indexData.clear();
+
+		enum class Section {
+			None,
+			Points,
+			Indices,
+		};
+		Section currentSection = Section::None;
+
+		float value;
+		uint16_t index;
+		std::string line;
+		while (!file.eof()) {
+			getline(file, line);
+			if (line == "[points]") {
+				currentSection = Section::Points;
+			}
+			else if (line == "[indices]") {
+				currentSection = Section::Indices;
+			}
+			else if (line[0] == '#' || line.empty()) {
+				// Do nothing, this is a comment
+			}
+			else if (currentSection == Section::Points) {
+				std::istringstream iss(line);
+				// Get x, y, r, g, b
+				for (int i = 0; i < 5; ++i) {
+					iss >> value;
+					pointData.push_back(value);
+				}
+			}
+			else if (currentSection == Section::Indices) {
+				std::istringstream iss(line);
+				// Get corners #0 #1 and #2
+				for (int i = 0; i < 3; ++i) {
+					iss >> index;
+					indexData.push_back(index);
+				}
+			}
+		}
+		return true;
 	}
 
 }

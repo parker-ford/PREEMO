@@ -7,19 +7,40 @@
     <h1>Test</h1>
     <p>This is a test page.</p>
     <canvas id="canvas"></canvas>
-    <script src="../../out/build/release-emscripten/PREEMO.js"></script>
-    <script>
-        createModule().then(function(Module) {
-            try {
-                console.log(Module);
-                const root = new Module.Root();
-                root.StartUp(null);
-                root.Run();
-            } catch (e) {
-                console.error("Error:", e);
+    <script type="module">
+        import * as PREEMO from './package/src/index.js';
+
+        await PREEMO.initialize();
+        const scene = new PREEMO.Scene();
+
+        class MyScript extends PREEMO.Script{
+            OnUpdate() {
+                console.log(super.HasComponent(PREEMO.Components.TransformComponent))
+                // super.testFunction();
             }
-        });
+
+            OnCreate() {
+                console.log("ON CREATE")
+            }
+
+
+        }
+
+        const ent = scene.CreateEntity();
+        ent.AddComponent(PREEMO.Components.TransformComponent);
+        const scriptComponent = ent.AddComponent(PREEMO.Components.ScriptComponent).Bind(MyScript);
+
+    
+        PREEMO.testScript();
+
+
+        // const testEnt = PREEMO.testScript();
+        // scriptComponent.Bind(testEnt);
+
+        PREEMO.Run(scene);
+
     </script>
+    
 </body>
 
 </html>

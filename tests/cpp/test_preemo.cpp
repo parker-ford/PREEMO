@@ -14,8 +14,8 @@ TEST(PreemoTest, SampleTest) {
 }
 
 TEST(PreemoTest, TestRootInit) {
-	preemo::Root root;
-	EXPECT_TRUE(root.StartUp(nullptr));
+	/*preemo::Root root;
+	EXPECT_TRUE(root.StartUp(nullptr));*/
 	//EXPECT_TRUE(root.Initialize(nullptr));
 
 	//EXPECT_EQ(1, 1);

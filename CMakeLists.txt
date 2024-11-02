@@ -8,14 +8,14 @@ project (
 	LANGUAGES CXX C
 )
 
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
 # Fetch and include Google Test
+include(FetchContent)
 if(NOT EMSCRIPTEN)
-	include(FetchContent)
 	FetchContent_Declare(
 		googletest
 		URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
@@ -43,27 +43,30 @@ add_subdirectory(external/glfw3webgpu)
 # file(GLOB_RECURSE PREEMO_SOURCES "src/*.cpp")
 
 # Create the library
+set(PREEMO_SOURCES
+    src/PreemoRoot.cpp
+    src/PreemoRenderingManager.cpp
+    src/PreemoRenderingManagerAdapter.cpp
+    src/PreemoRenderingManagerDevice.cpp
+    src/PreemoRenderingManagerSurface.cpp
+    src/PreemoRenderingManagerInstance.cpp
+    src/PreemoRenderPipeline.cpp
+    src/PreemoScene.cpp
+	src/PreemoScriptableEntity.cpp
+    src/PreemoEntity.cpp
+    src/webgpu_impl.cpp
+	src/PreemoSceneManager.cpp
+	src/PreemoComponents.cpp
+)
 if(EMSCRIPTEN)
 	add_executable(PREEMO 
-		src/PreemoRoot.cpp
-		src/PreemoRenderingManager.cpp
-		src/PreemoRenderingManagerAdapter.cpp
-		src/PreemoRenderingManagerDevice.cpp
-		src/PreemoRenderingManagerSurface.cpp
-		src/PreemoRenderingManagerInstance.cpp
-		src/webgpu_impl.cpp
+		${PREEMO_SOURCES}
 		${CMAKE_BINARY_DIR}/intermediate/webidl_wrapper.cpp
 	)
 	include_directories(${CMAKE_BINARY_DIR}/intermediate)
 else()
 	add_library(PREEMO
-		src/PreemoRoot.cpp
-		src/PreemoRenderingManager.cpp
-		src/PreemoRenderingManagerAdapter.cpp
-		src/PreemoRenderingManagerDevice.cpp
-		src/PreemoRenderingManagerSurface.cpp
-		src/PreemoRenderingManagerInstance.cpp
-		src/webgpu_impl.cpp
+		${PREEMO_SOURCES}
 	)
 
 	# Add a new executable target for direct running
@@ -74,13 +77,29 @@ else()
 		PREEMO
 		glfw
 	)
-	target_include_directories(PREEMO_standalone PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	set_target_properties(PREEMO_standalone PROPERTIES
+		CXX_STANDARD 17
+		CXX_STANDARD_REQUIRED ON
+		CXX_EXTENSIONS OFF
+		COMPILE_WARNING_AS_ERROR ON
+	)
+	#target_include_directories(PREEMO_standalone PRIVATE 
+	#	${CMAKE_CURRENT_SOURCE_DIR}/include 
+	#	${CMAKE_CURRENT_SOURCE_DIR}/external
+	#)
 endif()
 
 # Set include directories
-target_include_directories(PREEMO PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(PREEMO PUBLIC 
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/external
+)
 
-target_link_libraries(PREEMO PUBLIC glfw webgpu glfw3webgpu)
+target_link_libraries(PREEMO PUBLIC 
+	glfw
+	webgpu
+	glfw3webgpu
+)
 
 target_copy_webgpu_binaries(PREEMO)
 
@@ -108,14 +127,24 @@ if (EMSCRIPTEN)
 	set_target_properties(PREEMO PROPERTIES SUFFIX ".js")
     target_link_options(PREEMO PRIVATE
 		-sASSERTIONS=1
-        -sASYNCIFY=1
+        -sASYNCIFY
         -sWASM=1
         -sMODULARIZE=1
         -sEXPORT_NAME="createModule"
         "--post-js=${CMAKE_BINARY_DIR}/intermediate/glue.js"
+		-sNO_DISABLE_EXCEPTION_CATCHING
     )
     
     # set_target_properties(PREEMO PROPERTIES OUTPUT_NAME "preemo")
+endif()
+
+if(EMSCRIPTEN)
+  target_compile_options(PREEMO PRIVATE 
+  -Wno-delete-incomplete
+  -Wno-dollar-in-identifier-extension
+  -Wno-unused-parameter
+  -Wno-unused-variable
+  )
 endif()
 
 if(NOT EMSCRIPTEN)
@@ -126,4 +155,9 @@ if(NOT EMSCRIPTEN)
 	add_subdirectory(tests)
 endif()
 
-
+if(EMSCRIPTEN)
+     message("Emscripten CXX flags: ${CMAKE_CXX_FLAGS}")
+   else()
+     message("WebGPU CXX flags: ${CMAKE_CXX_FLAGS}")
+   endif()
+   

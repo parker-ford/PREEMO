@@ -1,5 +1,4 @@
-#ifndef __RENDERING_MANAGER__
-#define __RENDERING_MANAGER__
+#pragma once
 
 #include <webgpu/webgpu.hpp>
 #include <GLFW/glfw3.h>
@@ -13,18 +12,16 @@
 
 #include <iostream>
 #include <cassert>
-#include <vector>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+namespace fs = std::filesystem;
+#include "PreemoRenderPipeline.h"
 
 namespace preemo {
 	class RenderingManager {
-	public:
-		bool StartUp(void* windowPtr);
-		void ShutDown();
-		void MainLoop();
-		bool IsRunning();
-	private:
-		bool InitializeInstance(wgpu::Instance* instance);
-
 	private:
 		class Instance;
 		class Adapter;
@@ -36,7 +33,7 @@ namespace preemo {
 		public:
 			Instance();
 		private:
-			wgpu::Instance wgpuInstance;
+			wgpu::Instance wgpu_instance;
 		};
 
 		class Adapter {
@@ -45,10 +42,11 @@ namespace preemo {
 		public:
 			Adapter(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options);
 			void Inspect();
+			wgpu::RequiredLimits GetRequiredLimits();
 		private:
 			wgpu::Adapter RequestAdapterSynchronous(wgpu::Instance instance, wgpu::RequestAdapterOptions const* options);
 		private:
-			wgpu::Adapter wgpuAdapter;
+			wgpu::Adapter wgpu_adapter;
 		};
 
 		class Device {
@@ -60,7 +58,7 @@ namespace preemo {
 		private:
 			wgpu::Device RequestDeviceSynchronous(wgpu::Adapter adapter, wgpu::DeviceDescriptor const* descriptor);
 		private:
-			wgpu::Device wgpuDevice;
+			wgpu::Device wgpu_device;
 		};
 
 		class Surface {
@@ -71,16 +69,44 @@ namespace preemo {
 			bool ShouldClose();
 			void Configure(wgpu::SurfaceConfiguration* config);
 			wgpu::TextureView GetNextSurfaceTextureView();
+		public:
+			wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 		private:
-			wgpu::Surface wgpuSurface;
-			GLFWwindow* window;
+			wgpu::Surface wgpu_surface;
+			GLFWwindow* m_window;
 		};
 
+	public:
+		RenderingManager(const RenderingManager&) = delete;
+		RenderingManager& operator=(const RenderingManager&) = delete;
+
+		static bool StartUp(void* windowPtr);
+		static void ShutDown();
+		static RenderingManager& GetInstance();
+
+		void MainLoop();
+		bool IsRunning();
+		wgpu::Device getWGPUDevice();
+		Surface getSurface();
+		Device getDevice();
+
+		//Testing
+		void TestPipeline();
+		void TestBuffers();
+
 	private:
-		wgpu::Queue queue;
-		Device device;
-		Surface surface;
+		RenderingManager(void* windowPtr);
+		~RenderingManager();
+	private:
+		//PREEMO_TODO: Need to consider making these pointers
+		wgpu::Queue m_queue;
+		Device m_device;
+		Surface m_surface;
+
+		//Testing
+		RenderPipeline* m_pipeline;
+		uint32_t indexCount;
+		wgpu::Buffer pointBuffer;
+		wgpu::Buffer indexBuffer;
 	};
 }
-
-#endif // __RENDERING_MANAGER__
