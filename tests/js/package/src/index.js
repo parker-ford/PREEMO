@@ -175,15 +175,8 @@ export class ScriptComponent {
 export class Script {
   entity;
   HasComponent(type) {
-    // this.entity.HasComponent(type);
-    // console.log(this.testNum);
-    // return this.testNum;
     return this.entity.HasComponent(type);
   }
-  // testFunction() {
-  //   // this.test = 2;
-  //   console.log("yo " + this.test);
-  // }
 }
 
 // export class Script extends preemo.ScriptableEntityJS {}
